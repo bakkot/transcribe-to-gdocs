@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "dependencies": {
+    "@google-cloud/speech": "^4.1.3",
+    "diff": "^4.0.2",
+    "googleapis": "^60.0.1",
+    "node-record-lpcm16": "^1.0.1"
+  }
+}
