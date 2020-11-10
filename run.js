@@ -62,16 +62,9 @@ async function infiniteStream(append, {
 
   let recognizeStream = null;
   let restartCounter = 0;
-  let audioInput = [];
-  let lastAudioInput = [];
-  let resultEndTime = 0;
-  let isFinalEndTime = 0;
-  let finalRequestEndTime = 0;
-  let newStream = true;
-  let bridgingOffset = 0;
+  let deferredChunks = [];
 
   function startStream() {
-    audioInput = [];
     recognizeStream = client
       .streamingRecognize(request)
       .on('error', err => {
@@ -81,116 +74,96 @@ async function infiniteStream(append, {
           console.error('API request error ' + err);
         }
       })
-      .on('data', speechCallback);
+      .on('data', getSpeechCallback());
 
-    // Restart stream when streamingLimit expires
     setTimeout(restartStream, streamingLimit);
   }
 
-  // could we do this in a more clever way? yes. maybe we should eventually, but I don't care enough right now.
-  let queue = [];
-  let lock = false;
-  let prev = '';
-  setInterval(async () => {
-    if (queue.length === 0) {
-      return;
-    }
-    if (lock) {
-      return;
-    }
-    lock = true;
-
-    let next = queue.shift();
-
-    // Unfortunately the gdocs API's claimed `targetRevisionId` thing does not work at all, so we're stuck with just appending.
-    // The speech API doesn't finalize until a long time in, but early stuff tends not to change.
-    // So assume all but the last BUFFER characters can be committed. Sometimes this leads to weird typos, but it's worth it to have transcripts be more live.
-    let BUFFER = 20;
-    switch (next.type) {
-      case 'init': {
-        let text = next.text.substring(0, next.text.length - BUFFER);
-        console.log('init', JSON.stringify(text));
-        // await init(next.text);
-        await append(text);
-        prev = text;
-        break;
+  let activeQueueTimer = null;
+  function getSpeechCallback() {
+    // could we do this in a more clever way? yes. maybe we should eventually, but I don't care enough right now.
+    let queue = [];
+    let lock = false;
+    let prev = '';
+    activeQueueTimer = setInterval(async () => {
+      if (queue.length === 0) {
+        return;
       }
-      case 'update': {
-        let text = next.text.substring(0, next.text.length - BUFFER);
-        console.log('update', JSON.stringify(text));
-        // await update(next.text);
-        await append(text.substring(prev.length));
-        prev = text;
-
-        break;
+      if (lock) {
+        return;
       }
-      case 'finish': {
-        console.log('finish', JSON.stringify(next.text));
-        // await finish(next.text);
-        await append(next.text.substring(prev.length));
-        prev = '';
-        break;
+      lock = true;
+
+      let next = queue.shift();
+
+      // Unfortunately the gdocs API's claimed `targetRevisionId` thing does not work at all, so we're stuck with just appending.
+      // The speech API doesn't finalize until a long time in, but early stuff tends not to change.
+      // So assume all but the last BUFFER characters can be committed. Sometimes this leads to weird typos, but it's worth it to have transcripts be more live.
+      let BUFFER = 20;
+      switch (next.type) {
+        case 'init': {
+          let text = next.text.substring(0, next.text.length - BUFFER);
+          console.log('init', JSON.stringify(text));
+          // await init(next.text);
+          await append(text);
+          prev = text;
+          break;
+        }
+        case 'update': {
+          let text = next.text.substring(0, next.text.length - BUFFER);
+          console.log('update', JSON.stringify(text));
+          // await update(next.text);
+          await append(text.substring(prev.length));
+          prev = text;
+
+          break;
+        }
+        case 'finish': {
+          console.log('finish', JSON.stringify(next.text));
+          // await finish(next.text);
+          await append(next.text.substring(prev.length));
+          prev = '';
+          break;
+        }
       }
-    }
 
-    lock = false;
-  }, 1100);
+      lock = false;
+    }, 1100);
 
-  let shouldInit = true;
-  let speechCallback = stream => {
-    resultEndTime =
-      stream.results[0].resultEndTime.seconds * 1000 +
-      Math.round(stream.results[0].resultEndTime.nanos / 1000000);
-    let stdoutText = '';
-    if (stream.results[0].alternatives[0]) {
-      stdoutText = stream.results[0].alternatives[0].transcript;
-    }
-    if (stream.results[0].isFinal) {
-      isFinalEndTime = resultEndTime;
-      queue.push({ type: 'finish', text: stdoutText });
-      shouldInit = true;
-    } else if (shouldInit) {
-      queue.push({ type: 'init', text: stdoutText });
-      shouldInit = false;
-    } else {
-      if (queue.length > 0 && queue[queue.length - 1].type === 'update') {
-        queue[queue.length - 1].text = stdoutText;
+    let shouldInit = true;
+    return stream => {
+      let stdoutText = '';
+      if (stream.results[0].alternatives[0]) {
+        stdoutText = stream.results[0].alternatives[0].transcript;
+      }
+      if (stream.results[0].isFinal) {
+        queue.push({ type: 'finish', text: stdoutText });
+        shouldInit = true;
+      } else if (shouldInit) {
+        queue.push({ type: 'init', text: stdoutText });
+        shouldInit = false;
       } else {
-        queue.push({ type: 'update', text: stdoutText });
+        if (queue.length > 0 && queue[queue.length - 1].type === 'update') {
+          queue[queue.length - 1].text = stdoutText;
+        } else {
+          queue.push({ type: 'update', text: stdoutText });
+        }
       }
-    }
-  };
+    };
+  }
 
   let audioInputStreamTransform = new Writable({
     write(chunk, encoding, next) {
-      if (newStream && lastAudioInput.length !== 0) {
-        // Approximate math to calculate time of chunks
-        const chunkTime = streamingLimit / lastAudioInput.length;
-        if (chunkTime !== 0) {
-          if (bridgingOffset < 0) {
-            bridgingOffset = 0;
-          }
-          if (bridgingOffset > finalRequestEndTime) {
-            bridgingOffset = finalRequestEndTime;
-          }
-          const chunksFromMS = Math.floor(
-            (finalRequestEndTime - bridgingOffset) / chunkTime
-          );
-          bridgingOffset = Math.floor(
-            (lastAudioInput.length - chunksFromMS) * chunkTime
-          );
-
-          for (let i = chunksFromMS; i < lastAudioInput.length; i++) {
-            recognizeStream.write(lastAudioInput[i]);
-          }
-        }
-        newStream = false;
-      }
-
-      audioInput.push(chunk);
-
       if (recognizeStream) {
+        if (deferredChunks.length > 0) {
+          for (let chunk of deferredChunks) {
+            recognizeStream.write(chunk);
+          }
+          deferredChunks = [];
+        }
         recognizeStream.write(chunk);
+      } else {
+        deferredChunks.push(chunk);
       }
 
       next();
@@ -206,23 +179,15 @@ async function infiniteStream(append, {
   function restartStream() {
     if (recognizeStream) {
       recognizeStream.end();
-      recognizeStream.removeListener('data', speechCallback);
+      let oldInterval = activeQueueTimer;
+      setTimeout(() => clearInterval(oldInterval), 10000); // give it ten seconds to finish draining
+      activeQueueTimer = null;
       recognizeStream = null;
     }
-
-    if (resultEndTime > 0) {
-      finalRequestEndTime = isFinalEndTime;
-    }
-    resultEndTime = 0;
-
-    lastAudioInput = [];
-    lastAudioInput = audioInput;
 
     restartCounter++;
 
     process.stdout.write(`### ${streamingLimit * restartCounter}: RESTARTING REQUEST\n`);
-
-    newStream = true;
 
     startStream();
   }
