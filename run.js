@@ -42,7 +42,7 @@ async function infiniteStream(append, {
   encoding = 'LINEAR16',
   sampleRateHertz = 16000,
   languageCode = 'en-US',
-  streamingLimit = 290000,
+  streamingLimit = 29000/2,
 } = {}) {
 
   let client = new speech.SpeechClient();
@@ -64,6 +64,9 @@ async function infiniteStream(append, {
   let restartCounter = 0;
   let audioInput = [];
   let lastAudioInput = [];
+  let resultEndTime = 0;
+  let isFinalEndTime = 0;
+  let finalRequestEndTime = 0;
   let newStream = true;
   let bridgingOffset = 0;
 
@@ -135,11 +138,15 @@ async function infiniteStream(append, {
 
   let shouldInit = true;
   let speechCallback = stream => {
+    resultEndTime =
+      stream.results[0].resultEndTime.seconds * 1000 +
+      Math.round(stream.results[0].resultEndTime.nanos / 1000000);
     let stdoutText = '';
     if (stream.results[0].alternatives[0]) {
       stdoutText = stream.results[0].alternatives[0].transcript;
     }
     if (stream.results[0].isFinal) {
+      isFinalEndTime = resultEndTime;
       queue.push({ type: 'finish', text: stdoutText });
       shouldInit = true;
     } else if (shouldInit) {
@@ -202,6 +209,11 @@ async function infiniteStream(append, {
       recognizeStream.removeListener('data', speechCallback);
       recognizeStream = null;
     }
+
+    if (resultEndTime > 0) {
+      finalRequestEndTime = isFinalEndTime;
+    }
+    resultEndTime = 0;
 
     lastAudioInput = [];
     lastAudioInput = audioInput;
