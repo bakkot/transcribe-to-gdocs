@@ -275,7 +275,8 @@ const REPLACEMENTS = [
   [/\ba sink\b/gi, 'async'],
   [/\bsink\b/gi, 'sync'],
   [/\bDominic\b/g, 'Domenic'],
-  [/\bapi(s)\b/g, (text, a) => `API${s}`],
+  [/\bapi(s)\b/g, (text, s) => `API${s}`],
+  [/\bequal system(s)\b/g, (text, s) => `ecosystem${s}`],
 ]
 
 function makeReplacements(text) {
