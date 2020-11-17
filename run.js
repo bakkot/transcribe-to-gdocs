@@ -254,7 +254,7 @@ async function initGdocsClient(documentId) {
       requestBody: {
         requests: [{
           insertText: {
-            text,
+            text: makeReplacements(text),
             endOfSegmentLocation: {
               segmentId: '',
             },
@@ -265,6 +265,25 @@ async function initGdocsClient(documentId) {
   };
 };
 
+const REPLACEMENTS = [
+  [/\s+/g, ' '],
+  [/ dot /gi, '.'],
+  [/javascript/gi, 'JavaScript'],
+  [/\bC[- ]sharp\b/gi, 'C#'], // Ron
+  [/\b(a)ssessor\b/gi, (text, a) => `${a}ccessor`], // Ron
+  [/\bsho(?:e|ot?)\b/gi, 'SYG'], // Shu
+  [/\ba sink\b/gi, 'async'],
+  [/\bsink\b/gi, 'sync'],
+  [/\bDominic\b/g, 'Domenic'],
+  [/\bapi(s)\b/g, (text, a) => `API${s}`],
+]
+
+function makeReplacements(text) {
+  for (args of REPLACEMENTS) {
+    text = text.replaceAll.apply(text, args);
+  }
+  return text;
+}
 
 async function authorizeGdocsClient(credentials) {
   let { client_secret, client_id, redirect_uris } = credentials.installed;
