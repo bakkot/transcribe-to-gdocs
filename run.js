@@ -277,7 +277,7 @@ const REPLACEMENTS = [
   [/\bdominic\b/gi, 'Domenic'],
   [/\bapi(s)\b/g, (text, s) => `API${s}`],
   [/\bequal system(s)\b/g, (text, s) => `ecosystem${s}`],
-  [/\bdom\b/gi, 'DOM'],
+  [/\bdome?\b/gi, 'DOM'],
   [/\bjazz\b/gi, 'JS'],
 ]
 
