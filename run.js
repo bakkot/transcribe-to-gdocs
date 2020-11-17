@@ -269,7 +269,7 @@ const REPLACEMENTS = [
   [/\s+/g, ' '],
   [/ dot /gi, '.'],
   [/javascript/gi, 'JavaScript'],
-  [/\bC[- ]sharp\b/gi, 'C#'], // Ron
+  [/\bc[- ]sharp\b/gi, 'C#'], // Ron
   [/\b(a)ssessor\b/gi, (text, a) => `${a}ccessor`], // Ron
   [/\bsho(?:e|ot?)\b/gi, 'SYG'], // Shu
   [/\b(a )?sink\b/gi, (text, a) => `${a == null ? '' : 'a'}sync`],
@@ -277,7 +277,8 @@ const REPLACEMENTS = [
   [/\bapi(s)\b/g, (text, s) => `API${s}`],
   [/\bequal system(s)\b/g, (text, s) => `ecosystem${s}`],
   [/\bdome?\b/gi, 'DOM'],
-  [/\bjazz\b/gi, 'JS'],
+  [/\b(jazz|jessie)\b/gi, 'JS'],
+  [/\beconomic\b/gi, 'ergonomic'],
 ]
 
 function makeReplacements(text) {
