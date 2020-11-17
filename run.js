@@ -272,8 +272,7 @@ const REPLACEMENTS = [
   [/\bC[- ]sharp\b/gi, 'C#'], // Ron
   [/\b(a)ssessor\b/gi, (text, a) => `${a}ccessor`], // Ron
   [/\bsho(?:e|ot?)\b/gi, 'SYG'], // Shu
-  [/\ba sink\b/gi, 'async'],
-  [/\bsink\b/gi, 'sync'],
+  [/\b(a )?sink\b/gi, (text, a) => `${a == null ? '' : 'a'}sync`],
   [/\bdominic\b/gi, 'Domenic'],
   [/\bapi(s)\b/g, (text, s) => `API${s}`],
   [/\bequal system(s)\b/g, (text, s) => `ecosystem${s}`],
