@@ -278,6 +278,7 @@ const REPLACEMENTS = [
   [/\bapi(s)\b/g, (text, s) => `API${s}`],
   [/\bequal system(s)\b/g, (text, s) => `ecosystem${s}`],
   [/\bdom\b/gi, 'DOM'],
+  [/\bjazz\b/gi, 'JS'],
 ]
 
 function makeReplacements(text) {
