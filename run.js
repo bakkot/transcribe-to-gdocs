@@ -274,7 +274,7 @@ const REPLACEMENTS = [
   [/\bsho(?:e|ot?)\b/gi, 'SYG'], // Shu
   [/\ba sink\b/gi, 'async'],
   [/\bsink\b/gi, 'sync'],
-  [/\bDominic\b/g, 'Domenic'],
+  [/\bdominic\b/gi, 'Domenic'],
   [/\bapi(s)\b/g, (text, s) => `API${s}`],
   [/\bequal system(s)\b/g, (text, s) => `ecosystem${s}`],
 ]
