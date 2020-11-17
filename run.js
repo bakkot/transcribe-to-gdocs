@@ -279,7 +279,7 @@ const REPLACEMENTS = [
 ]
 
 function makeReplacements(text) {
-  for (args of REPLACEMENTS) {
+  for (let args of REPLACEMENTS) {
     text = text.replaceAll.apply(text, args);
   }
   return text;
