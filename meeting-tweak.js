@@ -311,7 +311,7 @@ const REPLACEMENTS = [
   [/ dot /gi, '.'],
   [/javascript/gi, 'JavaScript'],
   [/\bc[- ]sharp\b/gi, 'C#'], // Ron
-  [/\b(a)ssessor\b/gi, (text, a) => `${a}ccessor`], // Ron
+  [/\b(a)ssessor(?=s)\b/gi, (text, a) => `${a}ccessor`], // Ron
   [/\bsho(?:e|ot?)\b/gi, 'SYG'], // Shu
   [/\b(a )?sink\b/gi, (text, a) => `${a == null ? '' : 'a'}sync`],
   [/\bdominic\b/gi, 'Domenic'],
