@@ -323,7 +323,7 @@ const REPLACEMENTS = [
   [/\bjason\b/gi, 'JSON'],
   [/\bmind type(?=s)?\b/gi, 'mime type'],
   [/\bimmune ability\b/gi, 'immutability'],
-  [/\b(?<=the )?temple\b/gi, 'Temporal'],
+  [/\b(?:the )?temple\b/gi, 'Temporal'],
   [/\bIntel\b/gi, 'Intl'],
 ];
 
