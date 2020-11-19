@@ -85,6 +85,7 @@ async function infiniteStream(append, {
     let queue = [];
     let lock = false;
     let prev = '';
+    let prevSkip = 0;
     activeQueueTimer = setInterval(async () => {
       if (queue.length === 0) {
         return;
@@ -100,28 +101,58 @@ async function infiniteStream(append, {
       // The speech API doesn't finalize until a long time in, but early stuff tends not to change.
       // So assume all but the last BUFFER characters can be committed. Sometimes this leads to weird typos, but it's worth it to have transcripts be more live.
       let BUFFER = 20;
+      let wordsBuffer = 5;
       switch (next.type) {
         case 'init': {
-          let text = next.text.substring(0, next.text.length - BUFFER);
-          console.log('init', JSON.stringify(text));
+          let words = next.text.split(' ');
+          let text = words.slice(0, Math.min(wordsBuffer, words.length - 2));
+          prevSkip = text.length;
+          text = ' ' + text.join(' ').trim();
+          console.log('init', JSON.stringify(next.text));
+          console.log('appending', JSON.stringify(text));
           // await init(next.text);
           await append(text);
           prev = text;
           break;
         }
         case 'update': {
-          let text = next.text.substring(0, next.text.length - BUFFER);
-          console.log('update', JSON.stringify(text));
+          let words = next.text.split(' ');
+          let newInit = words.slice(0, prevSkip).join(' ');
+          let skipFirst = newInit.trim().length > prev.trim().length ? prevSkip - 1 : prevSkip;
+          if (newInit.trim().length > prev.trim().length) {
+            console.log('length mismatch')
+            console.log(JSON.stringify(newInit.trim()), JSON.stringify(prev.trim()))
+          }
+          let text = words.slice(skipFirst, Math.min(skipFirst + wordsBuffer, words.length - 2));
+          if (text.length == 0) {
+            break;
+          }
+          prevSkip += text.length;
+          text = ' ' + text.join(' ').trim();
+
+          console.log('update', JSON.stringify(next.text));
+          console.log('appending', JSON.stringify(text));
           // await update(next.text);
-          await append(text.substring(prev.length));
-          prev = text;
+          await append(text);
+          prev += text;
 
           break;
         }
         case 'finish': {
+          let words = next.text.split(' ');
+          let newInit = words.slice(0, prevSkip).join(' ');
+          let skipFirst = newInit.trim().length > prev.trim().length ? prevSkip - 1 : prevSkip;
+          let text = ' ' + words.slice(skipFirst, words.length).join(' ').trim();
+
           console.log('finish', JSON.stringify(next.text));
+          console.log('appending', JSON.stringify(text));
+          if (!text.startsWith(' ')) {
+            text = ' ' + text;
+          }
+
+          toDisk(next.text);
           // await finish(next.text);
-          await append(next.text.substring(prev.length));
+          await append(text);
           prev = '';
           break;
         }
@@ -215,6 +246,14 @@ async function infiniteStream(append, {
 }
 
 
+
+function toDisk(text) {
+  // sync to avoid races
+  let fs = require('fs');
+  let file = './backup.txt';
+  fs.writeFileSync(file, fs.readFileSync(file, 'utf8') + '\n' + text, 'utf8');
+}
+
 async function initGdocsClient(documentId) {
   let secret = await fs.readFile(GDOCS_APPLICATION_SECRET_PATH, 'utf8');
   let auth = await authorizeGdocsClient(JSON.parse(secret));
@@ -246,7 +285,7 @@ async function initGdocsClient(documentId) {
   }
 
   return async text => {
-    if (text === '') {
+    if (text.trim() === '') {
       return;
     }
     await docs.documents.batchUpdate({
@@ -254,7 +293,7 @@ async function initGdocsClient(documentId) {
       requestBody: {
         requests: [{
           insertText: {
-            text,
+            text: makeReplacements(text),
             endOfSegmentLocation: {
               segmentId: '',
             },
@@ -265,6 +304,36 @@ async function initGdocsClient(documentId) {
   };
 };
 
+
+
+const REPLACEMENTS = [
+  [/\s+/g, ' '],
+  [/ dot /gi, '.'],
+  [/javascript/gi, 'JavaScript'],
+  [/\bc[- ]sharp\b/gi, 'C#'], // Ron
+  [/\b(a)ssessor\b/gi, (text, a) => `${a}ccessor`], // Ron
+  [/\bsho(?:e|ot?)\b/gi, 'SYG'], // Shu
+  [/\b(a )?sink\b/gi, (text, a) => `${a == null ? '' : 'a'}sync`],
+  [/\bdominic\b/gi, 'Domenic'],
+  [/\bapi(s)\b/g, (text, s) => `API${s}`],
+  [/\bequal system(s)\b/g, (text, s) => `ecosystem${s}`],
+  [/\bdome?\b/gi, 'DOM'],
+  [/\b(jazz|jessie|jace)\b/gi, 'JS'],
+  [/\beconomic\b/gi, 'ergonomic'],
+  [/\bjason\b/gi, 'JSON'],
+  [/\bmind types\b/gi, 'mime types'],
+  [/\bimmune ability\b/gi, 'immutability'],
+  [/\bthe temple\b/gi, 'Temporal'],
+  [/\btemple\b/gi, 'Temporal'],
+  [/\bIntel\b/gi, 'Intl'],
+];
+
+function makeReplacements(text) {
+  for (let args of REPLACEMENTS) {
+    text = text.replaceAll.apply(text, args);
+  }
+  return text;
+}
 
 async function authorizeGdocsClient(credentials) {
   let { client_secret, client_id, redirect_uris } = credentials.installed;
@@ -289,7 +358,12 @@ async function authorizeGdocsClient(credentials) {
 }
 
 (async () => {
-  let docId = await ask('Google Docs id: ');
+  if (process.argv.length < 3) {
+    console.error('provide the doc ID as an argument');
+    process.exit(1);
+  }
+  let docId = process.argv[2];
+  // let docId = await ask('Google Docs id: ');
   let append = await initGdocsClient(docId.trim());
   infiniteStream(append);  
 })().catch(e => {
