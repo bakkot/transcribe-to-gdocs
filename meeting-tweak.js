@@ -315,16 +315,15 @@ const REPLACEMENTS = [
   [/\bsho(?:e|ot?)\b/gi, 'SYG'], // Shu
   [/\b(a )?sink\b/gi, (text, a) => `${a == null ? '' : 'a'}sync`],
   [/\bdominic\b/gi, 'Domenic'],
-  [/\bapi(s)\b/g, (text, s) => `API${s}`],
-  [/\bequal system(s)\b/g, (text, s) => `ecosystem${s}`],
+  [/\bapi(?=s)?\b/g, 'API'],
+  [/\bequal system(?=s)?\b/g, 'ecosystem'],
   [/\bdome?\b/gi, 'DOM'],
   [/\b(jazz|jessie|jace)\b/gi, 'JS'],
   [/\beconomic\b/gi, 'ergonomic'],
   [/\bjason\b/gi, 'JSON'],
-  [/\bmind types\b/gi, 'mime types'],
+  [/\bmind type(?=s)?\b/gi, 'mime type'],
   [/\bimmune ability\b/gi, 'immutability'],
-  [/\bthe temple\b/gi, 'Temporal'],
-  [/\btemple\b/gi, 'Temporal'],
+  [/\b(?<=the )?temple\b/gi, 'Temporal'],
   [/\bIntel\b/gi, 'Intl'],
 ];
 
