@@ -310,9 +310,10 @@ const REPLACEMENTS = [
   [/\s+/g, ' '],
   [/ dot /gi, '.'],
   [/javascript/gi, 'JavaScript'],
-  [/\bc[- ]sharp\b/gi, 'C#'], // Ron
-  [/\b(a)ssessor\b/gi, (text, a) => `${a}ccessor`], // Ron
-  [/\bsho(?:e|ot?)\b/gi, 'SYG'], // Shu
+  [/\bc[- ]sharp\b/gi, 'C#'],
+  [/\b(a)ssessor\b/gi, (text, a) => `${a}ccessor`],
+  [/\b(a)ssessors\b/gi, (text, a) => `${a}ccessors`],
+  [/\bsho(?:e|ot?)\b/gi, 'Shu'],
   [/\b(a )?sink\b/gi, (text, a) => `${a == null ? '' : 'a'}sync`],
   [/\bdominic\b/gi, 'Domenic'],
   [/\bapi(s)\b/g, (text, s) => `API${s}`],
@@ -321,11 +322,13 @@ const REPLACEMENTS = [
   [/\b(jazz|jessie|jace)\b/gi, 'JS'],
   [/\beconomic\b/gi, 'ergonomic'],
   [/\bjason\b/gi, 'JSON'],
+  [/\bJson\b/gi, 'JSON'],
   [/\bmind types\b/gi, 'mime types'],
   [/\bimmune ability\b/gi, 'immutability'],
   [/\bthe temple\b/gi, 'Temporal'],
   [/\btemple\b/gi, 'Temporal'],
   [/\bIntel\b/gi, 'Intl'],
+  [/\bacma\b/gi, 'Ecma'],
 ];
 
 function makeReplacements(text) {
