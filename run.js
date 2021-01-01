@@ -3,6 +3,7 @@
 'use strict';
 
 let fs = require('fs').promises;
+let { readFileSync, writeFileSync } = require('fs');
 
 let { Writable } = require('stream');
 let recorder = require('node-record-lpcm16');
@@ -85,6 +86,7 @@ async function infiniteStream(append, {
     let queue = [];
     let lock = false;
     let prev = '';
+    let prevSkip = 0;
     activeQueueTimer = setInterval(async () => {
       if (queue.length === 0) {
         return;
@@ -100,28 +102,55 @@ async function infiniteStream(append, {
       // The speech API doesn't finalize until a long time in, but early stuff tends not to change.
       // So assume all but the last BUFFER characters can be committed. Sometimes this leads to weird typos, but it's worth it to have transcripts be more live.
       let BUFFER = 20;
+      let wordsBuffer = 5;
       switch (next.type) {
         case 'init': {
-          let text = next.text.substring(0, next.text.length - BUFFER);
-          console.log('init', JSON.stringify(text));
-          // await init(next.text);
+          let words = next.text.split(' ');
+          let text = words.slice(0, Math.min(wordsBuffer, words.length - 2));
+          prevSkip = text.length;
+          text = ' ' + text.join(' ').trim();
+          console.log('init', JSON.stringify(next.text));
+          console.log('appending', JSON.stringify(text));
           await append(text);
           prev = text;
           break;
         }
         case 'update': {
-          let text = next.text.substring(0, next.text.length - BUFFER);
-          console.log('update', JSON.stringify(text));
-          // await update(next.text);
-          await append(text.substring(prev.length));
-          prev = text;
+          let words = next.text.split(' ');
+          let newInit = words.slice(0, prevSkip).join(' ');
+          let skipFirst = newInit.trim().length > prev.trim().length ? prevSkip - 1 : prevSkip;
+          if (newInit.trim().length > prev.trim().length) {
+            console.log('length mismatch')
+            console.log(JSON.stringify(newInit.trim()), JSON.stringify(prev.trim()))
+          }
+          let text = words.slice(skipFirst, Math.min(skipFirst + wordsBuffer, words.length - 2));
+          if (text.length == 0) {
+            break;
+          }
+          prevSkip += text.length;
+          text = ' ' + text.join(' ').trim();
+
+          console.log('update', JSON.stringify(next.text));
+          console.log('appending', JSON.stringify(text));
+          await append(text);
+          prev += text;
 
           break;
         }
         case 'finish': {
+          let words = next.text.split(' ');
+          let newInit = words.slice(0, prevSkip).join(' ');
+          let skipFirst = newInit.trim().length > prev.trim().length ? prevSkip - 1 : prevSkip;
+          let text = ' ' + words.slice(skipFirst, words.length).join(' ').trim();
+
           console.log('finish', JSON.stringify(next.text));
-          // await finish(next.text);
-          await append(next.text.substring(prev.length));
+          console.log('appending', JSON.stringify(text));
+          if (!text.startsWith(' ')) {
+            text = ' ' + text;
+          }
+
+          toDisk(next.text);
+          await append(text);
           prev = '';
           break;
         }
@@ -215,6 +244,19 @@ async function infiniteStream(append, {
 }
 
 
+
+function toDisk(text) {
+  let file = './backup.txt';
+  let contents = '';
+  try {
+    // sync to avoid races with itself
+    contents = readFileSync(file, 'utf8') + '\n';
+  } catch {
+    contents = '';
+  }
+  writeFileSync(file, contents + text, 'utf8');
+}
+
 async function initGdocsClient(documentId) {
   let secret = await fs.readFile(GDOCS_APPLICATION_SECRET_PATH, 'utf8');
   let auth = await authorizeGdocsClient(JSON.parse(secret));
@@ -246,7 +288,7 @@ async function initGdocsClient(documentId) {
   }
 
   return async text => {
-    if (text === '') {
+    if (text.trim() === '') {
       return;
     }
     await docs.documents.batchUpdate({
@@ -254,7 +296,7 @@ async function initGdocsClient(documentId) {
       requestBody: {
         requests: [{
           insertText: {
-            text,
+            text: fixup(text),
             endOfSegmentLocation: {
               segmentId: '',
             },
@@ -265,6 +307,33 @@ async function initGdocsClient(documentId) {
   };
 };
 
+let lastGoodReplacements = '';
+let lastBadReplacements = '';
+let fixup = text => text;
+
+function reloadFixup() {
+  let src = readFileSync('./replacements.js', 'utf8');
+  if (src === lastGoodReplacements || src === lastBadReplacements) {
+    return true;
+  }
+  try {
+    let newFixup = (0, eval)(src);
+    if (typeof newFixup !== 'function') {
+      lastBadReplacements = src;
+      console.error(`Failed to load replacements.js: expecting function, got ${typeof newFixup}`);
+      return false;
+    }
+    fixup = newFixup;
+    lastGoodReplacements = src;
+    console.log('(reloaded replacements.js)');
+    return true;
+  } catch (e) {
+    lastBadReplacements = src;
+    console.error(`Failed to load replacements.js: error evaling file`);
+    console.error(e);
+    return false;
+  }
+}
 
 async function authorizeGdocsClient(credentials) {
   let { client_secret, client_id, redirect_uris } = credentials.installed;
@@ -289,8 +358,19 @@ async function authorizeGdocsClient(credentials) {
 }
 
 (async () => {
-  let docId = await ask('Google Docs id: ');
+  if (process.argv.length < 3) {
+    console.error('provide the doc ID as an argument');
+    process.exit(1);
+  }
+  if (!reloadFixup()) {
+    // if this happens once we're running we should tolerate it, but here we can afford to require it to work
+    process.exit(1);
+  }
+  let docId = process.argv[2];
   let append = await initGdocsClient(docId.trim());
+
+  // could we watch instead of polling? maybe, but whatever.
+  setInterval(reloadFixup, 2000);
   infiniteStream(append);  
 })().catch(e => {
   console.error(e);
