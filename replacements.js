@@ -27,7 +27,9 @@ const REPLACEMENTS = [
 ];
 
 if (typeof ''.replaceAll !== 'function') {
-  throw new Error('Your version of node is too old to support replaceAll; please use a more recent version');
+  throw new Error(
+    'Your version of node is too old to support replaceAll; please use a more recent version'
+  );
 }
 
 function makeReplacements(text) {
