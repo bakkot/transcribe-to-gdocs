@@ -13,17 +13,13 @@ let { google } = require('googleapis');
 
 // TODO ask user to set this environment variable
 // this holds the speech API credentials (should be an object with `"type": "service_account"`)
-process.env.GOOGLE_APPLICATION_CREDENTIALS='./speech-service-account-key.json';
+process.env.GOOGLE_APPLICATION_CREDENTIALS = './speech-service-account-key.json';
 
 // this holds the docs API OAuth secret
 const GDOCS_APPLICATION_SECRET_PATH = './gdocs-client-oauth-secret.json';
 
 // oauth token will be cached here
 const TOKEN_PATH = './GENERATED_TOKEN.json';
-
-
-
-let delay = ms => new Promise(res => setTimeout(res, ms));
 
 function ask(question) {
   let rl = readline.createInterface({
@@ -38,14 +34,15 @@ function ask(question) {
   });
 }
 
-
-async function infiniteStream(append, {
-  encoding = 'LINEAR16',
-  sampleRateHertz = 16000,
-  languageCode = 'en-US',
-  streamingLimit = 290000,
-} = {}) {
-
+async function infiniteStream(
+  append,
+  {
+    encoding = 'LINEAR16',
+    sampleRateHertz = 16000,
+    languageCode = 'en-US',
+    streamingLimit = 290000,
+  } = {}
+) {
   let client = new speech.SpeechClient();
 
   let config = {
@@ -100,8 +97,7 @@ async function infiniteStream(append, {
 
       // Unfortunately the gdocs API's claimed `targetRevisionId` thing does not work at all, so we're stuck with just appending.
       // The speech API doesn't finalize until a long time in, but early stuff tends not to change.
-      // So assume all but the last BUFFER characters can be committed. Sometimes this leads to weird typos, but it's worth it to have transcripts be more live.
-      let BUFFER = 20;
+      // So assume all but the last wordsBuffer words can be committed. Sometimes this leads to weird typos, but it's worth it to have transcripts be more live.
       let wordsBuffer = 5;
       switch (next.type) {
         case 'init': {
@@ -120,8 +116,8 @@ async function infiniteStream(append, {
           let newInit = words.slice(0, prevSkip).join(' ');
           let skipFirst = newInit.trim().length > prev.trim().length ? prevSkip - 1 : prevSkip;
           if (newInit.trim().length > prev.trim().length) {
-            console.log('length mismatch')
-            console.log(JSON.stringify(newInit.trim()), JSON.stringify(prev.trim()))
+            console.log('length mismatch');
+            console.log(JSON.stringify(newInit.trim()), JSON.stringify(prev.trim()));
           }
           let text = words.slice(skipFirst, Math.min(skipFirst + wordsBuffer, words.length - 2));
           if (text.length == 0) {
@@ -243,8 +239,6 @@ async function infiniteStream(append, {
   startStream();
 }
 
-
-
 function toDisk(text) {
   let file = './backup.txt';
   let contents = '';
@@ -256,56 +250,6 @@ function toDisk(text) {
   }
   writeFileSync(file, contents + text, 'utf8');
 }
-
-async function initGdocsClient(documentId) {
-  let secret = await fs.readFile(GDOCS_APPLICATION_SECRET_PATH, 'utf8');
-  let auth = await authorizeGdocsClient(JSON.parse(secret));
-
-  const docs = google.docs({ version: 'v1', auth });
-
-  try {
-    // The API doesn't seem to expose permissions queries
-    // So test for writing permissions by writing the empty string to the end of the document
-    await docs.documents.batchUpdate({
-      documentId,
-      requestBody: {
-        requests: [{
-          insertText: {
-            text: '',
-            endOfSegmentLocation: {
-              segmentId: '',
-            },
-          },
-        }],
-      },
-    });
-  } catch (e) {
-    if (!e.message.includes('Insert text requests must specify text to insert.')) {
-      console.error('Failed to write to document - do you have sufficient permissions?');
-      console.error('Message: ' + e.message);
-      process.exit(1);
-    }
-  }
-
-  return async text => {
-    if (text.trim() === '') {
-      return;
-    }
-    await docs.documents.batchUpdate({
-      documentId,
-      requestBody: {
-        requests: [{
-          insertText: {
-            text: fixup(text),
-            endOfSegmentLocation: {
-              segmentId: '',
-            },
-          },
-        }],
-      },
-    });
-  };
-};
 
 let lastGoodReplacements = '';
 let lastBadReplacements = '';
@@ -333,6 +277,60 @@ function reloadFixup() {
     console.error(e);
     return false;
   }
+}
+
+async function initGdocsClient(documentId) {
+  let secret = await fs.readFile(GDOCS_APPLICATION_SECRET_PATH, 'utf8');
+  let auth = await authorizeGdocsClient(JSON.parse(secret));
+
+  const docs = google.docs({ version: 'v1', auth });
+
+  try {
+    // The API doesn't seem to expose permissions queries
+    // So test for writing permissions by writing the empty string to the end of the document
+    await docs.documents.batchUpdate({
+      documentId,
+      requestBody: {
+        requests: [
+          {
+            insertText: {
+              text: '',
+              endOfSegmentLocation: {
+                segmentId: '',
+              },
+            },
+          },
+        ],
+      },
+    });
+  } catch (e) {
+    if (!e.message.includes('Insert text requests must specify text to insert.')) {
+      console.error('Failed to write to document - do you have sufficient permissions?');
+      console.error('Message: ' + e.message);
+      process.exit(1);
+    }
+  }
+
+  return async text => {
+    if (text.trim() === '') {
+      return;
+    }
+    await docs.documents.batchUpdate({
+      documentId,
+      requestBody: {
+        requests: [
+          {
+            insertText: {
+              text: fixup(text),
+              endOfSegmentLocation: {
+                segmentId: '',
+              },
+            },
+          },
+        ],
+      },
+    });
+  };
 }
 
 async function authorizeGdocsClient(credentials) {
@@ -371,7 +369,7 @@ async function authorizeGdocsClient(credentials) {
 
   // could we watch instead of polling? maybe, but whatever.
   setInterval(reloadFixup, 2000);
-  infiniteStream(append);  
+  infiniteStream(append);
 })().catch(e => {
   console.error(e);
   process.exit(1);
