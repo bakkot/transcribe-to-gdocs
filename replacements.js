@@ -24,6 +24,9 @@ const REPLACEMENTS = [
   [/\btemple\b/gi, 'Temporal'],
   [/\bIntel\b/gi, 'Intl'],
   [/\bacma\b/gi, 'Ecma'],
+  [/\ba key\b/gi, 'Aki'],
+  [/\bpearl\b/gi, 'Perl'],
+  [/\bbaht\b/gi, 'bot'],
 ];
 
 if (typeof ''.replaceAll !== 'function') {
