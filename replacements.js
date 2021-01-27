@@ -41,7 +41,7 @@ const REPLACEMENTS = [
   [/\btc39\b/g, 'TC39'],
   [/\bgarlics\b/gi, 'grawlix'],
   [/\bthrone\b/gi, 'thrown'],
-  [/\bgarlics\b/gi, 'grawlix'],
+  [/\bgarlic's\b/gi, 'grawlix'],
   [/\bclothes\b/gi, 'close'],
   [/\bdunder proto\b/gi, '__proto__'],
   [/\bbrand x\b/gi, 'brand checks'],
