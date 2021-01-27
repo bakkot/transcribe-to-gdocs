@@ -311,10 +311,22 @@ async function initGdocsClient(documentId) {
     }
   }
 
+  // the "words" thing is a hack to avoid duplicates
+  // it would be better to deal with it more comphrensively at the use sites of this function
+  let lastWord = null;
   return async text => {
     if (text.trim() === '') {
       return;
     }
+    let words = text.split(/\b/);
+    if (words[1] === lastWord) { // we always start with a ' '.
+      text = text.substring(words[0].length + words[1].length);
+    }
+    if (text.trim() === '') {
+      return;
+    }
+    words = text.split(/\b/);
+    lastWord = words[words.length - 1];
     await docs.documents.batchUpdate({
       documentId,
       requestBody: {
