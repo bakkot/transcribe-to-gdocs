@@ -45,6 +45,7 @@ const REPLACEMENTS = [
   [/\bclothes\b/gi, 'close'],
   [/\bdunder proto\b/gi, '__proto__'],
   [/\bbrand x\b/gi, 'brand checks'],
+  [/\bbranch x\b/gi, 'brand checks'],
   [/\bspoof a bowl\b/gi, 'spoofable'],
   [/\baquifer to\b/gi, 'Ecma 402'],
   [/\baquifers are two\b/gi, 'Ecma 402'],
@@ -54,6 +55,9 @@ const REPLACEMENTS = [
   [/\btempura\b/gi, 'Temporal'],
   [/\btg1\b/gi, 'TG1'],
   [/\bsighs\b/gi, 'size'],
+  [/\binsole\b/gi, 'Intl'],
+  [/\breg ex\b/gi, 'regex'],
+  [/\bagalya\b/gi, 'Igalia'],
 ];
 
 if (typeof ''.replaceAll !== 'function') {
