@@ -58,6 +58,9 @@ const REPLACEMENTS = [
   [/\binsole\b/gi, 'Intl'],
   [/\breg ex\b/gi, 'regex'],
   [/\bagalya\b/gi, 'Igalia'],
+  [/\bThe Proposal\b/g, 'the proposal'],
+  [/\bVAR\b/g, 'var'],
+  [/\bturn aires\b/gi, 'ternaries'],
 ];
 
 if (typeof ''.replaceAll !== 'function') {
