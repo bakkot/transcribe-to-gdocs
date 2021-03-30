@@ -1,6 +1,6 @@
 # Transcribe to Google Docs
 
-This project lets you transcribe your audio input to Google Docs using Google's Cloud Speech API.
+This project lets you transcribe your audio input to Google Docs using Google's Cloud Speech API. You can edit the document in realtime (with a lag of a few seconds). If you don't need the ability to edit transcripts in realtime, you may prefer to use one of the many other, more polished transcription services.
 
 The Cloud Speech API is not free, so you will need to provide your own credentials to use this project.
 
@@ -24,6 +24,11 @@ Set up the app to allow users to grant it permission to edit documents on their 
 
 Finally, acquire the OAuth secret for your application. From the [APIs & Services](https://console.developers.google.com/apis/dashboard), select "Credentials", click Create Credentials at the top, select "OAuth Client ID", set the type to "Desktop app", give it a name, and click "create". It will tell you the ID and secret, but it's easier to click through and the click the download icon to the right of the newly created credential. Copy that JSON to a file named `gdocs-client-oauth-secret.json` in this directory.
 
+## Replacements
+
+The file `replacements.js` defines a function which transforms snippets as they come in, which is useful if the transcription makes consistent mistakes. The current set of replacements is optimized for [TC39](http://tc39.es/)'s needs, so you will almost certainly want to replace it.
+
+Changes to that file are loaded automatically; you don't need to restart the transcription.
 
 ## Use
 
