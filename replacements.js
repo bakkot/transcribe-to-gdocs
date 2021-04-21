@@ -83,6 +83,12 @@ const REPLACEMENTS = [
   [/\bsegment er\b/gi, 'segmenter'],
   [/\bgraphene\b/gi, 'grapheme'],
   [/\blip see\b/gi, 'libc'],
+  [/\bx icon\b/gi, 'execom'],
+  [/\bexact come\b/gi, 'execom'],
+  [/\bdalek\b/gi, 'dialect'],
+  [/\bTG to\b/gi, 'TG2'],
+  [/\bpresidents\b/gi, 'precedence'],
+  [/\bshoes\b/gi, "Shu's"],
 ];
 
 if (typeof ''.replaceAll !== 'function') {
