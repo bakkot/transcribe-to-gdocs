@@ -75,6 +75,7 @@ const REPLACEMENTS = [
   [/\bBR\b/gi, 'PR'],
   [/\bbite\b/gi, 'byte'],
   [/\bbike\b/gi, 'byte'],
+  [/\bbites\b/gi, 'bytes'],
   [/\bQ\b/g, 'queue'],
   [/\bGlobal's\b/g, 'globals'],
   [/\bJulia\b/g, 'Yulia'],
@@ -89,6 +90,12 @@ const REPLACEMENTS = [
   [/\bTG to\b/gi, 'TG2'],
   [/\bpresidents\b/gi, 'precedence'],
   [/\bshoes\b/gi, "Shu's"],
+  [/\bin fermentation\b/gi, 'implementation'],
+  [/\bprimordial ooze\b/gi, 'primordials'],
+  [/\bspeck\b/gi, 'spec'],
+  [/\bGoebbels\b/gi, 'globals'],
+  [/\bover aidable\b/gi, 'overwritable'],
+  [/\ba ski\b/gi, 'ASCII'],
 ];
 
 if (typeof ''.replaceAll !== 'function') {
