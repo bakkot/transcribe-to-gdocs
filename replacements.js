@@ -30,6 +30,7 @@ const REPLACEMENTS = [
   [/\bekam\b/gi, 'Ecma'],
   [/\baqua\b/gi, 'Ecma'],
   [/\becmo\b/gi, 'Ecma'],
+  [/\bemma\b/gi, 'Ecma'],
   [/\ba key\b/gi, 'Aki'],
   [/\bpearl\b/gi, 'Perl'],
   [/\bbaht\b/gi, 'bot'],
@@ -43,6 +44,10 @@ const REPLACEMENTS = [
   [/\bweek maps\b/gi, 'WeakMaps'],
   [/\bweek map\b/gi, 'WeakMap'],
   [/\btc39\b/g, 'TC39'],
+  [/\bpieces rp9\b/g, 'TC39'],
+  [/\bpieces certain eyes\b/g, 'TC39'],
+  [/\bpieces divine\b/g, 'TC39'],
+  [/\bDC circuit\b/g, 'TC39'],
   [/\bgarlics\b/gi, 'grawlix'],
   [/\bthrone\b/gi, 'thrown'],
   [/\bgarlic's\b/gi, 'grawlix'],
@@ -88,6 +93,8 @@ const REPLACEMENTS = [
   [/\bexact come\b/gi, 'execom'],
   [/\bdalek\b/gi, 'dialect'],
   [/\bTG to\b/gi, 'TG2'],
+  [/\btg2\b/gi, 'TG2'],
+  [/\bteach you\b/gi, 'TG2'],
   [/\bpresidents\b/gi, 'precedence'],
   [/\bshoes\b/gi, "Shu's"],
   [/\bin fermentation\b/gi, 'implementation'],
@@ -96,7 +103,13 @@ const REPLACEMENTS = [
   [/\bGoebbels\b/gi, 'globals'],
   [/\bover aidable\b/gi, 'overwritable'],
   [/\ba ski\b/gi, 'ASCII'],
+  [/\bGSE\b/gi, 'JSC'],
+  [/\blow -\b/gi, 'lodash'],
+  [/\bgroup by\b/gi, 'groupBy'],
+  [/\bEkman\b/gi, 'Ecma'],
+  [/\bgaas\b/gi, "GA's"],
 ];
+
 
 if (typeof ''.replaceAll !== 'function') {
   throw new Error(
