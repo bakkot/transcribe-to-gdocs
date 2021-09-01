@@ -97,12 +97,11 @@ async function infiniteStream(
 
       // Unfortunately the gdocs API's claimed `targetRevisionId` thing does not work at all, so we're stuck with just appending.
       // The speech API doesn't finalize until a long time in, but early stuff tends not to change.
-      // So assume all but the last wordsBuffer words can be committed. Sometimes this leads to weird typos, but it's worth it to have transcripts be more live.
-      let wordsBuffer = 5;
+      // So assume all but the last 2 words can be committed. Sometimes this leads to weird typos, but it's worth it to have transcripts be more live.
       switch (next.type) {
         case 'init': {
           let words = next.text.split(' ');
-          let text = words.slice(0, Math.min(wordsBuffer, words.length - 2));
+          let text = words.slice(0, Math.max(0, words.length - 2));
           prevSkip = text.length;
           text = ' ' + text.join(' ').trim();
           console.log('init', JSON.stringify(next.text));
@@ -119,7 +118,7 @@ async function infiniteStream(
             console.log('length mismatch');
             console.log(JSON.stringify(newInit.trim()), JSON.stringify(prev.trim()));
           }
-          let text = words.slice(skipFirst, Math.min(skipFirst + wordsBuffer, words.length - 2));
+          let text = words.slice(skipFirst, Math.max(skipFirst, words.length - 2));
           if (text.length == 0) {
             break;
           }

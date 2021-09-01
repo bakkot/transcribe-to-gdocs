@@ -31,6 +31,7 @@ const REPLACEMENTS = [
   [/\baqua\b/gi, 'Ecma'],
   [/\becmo\b/gi, 'Ecma'],
   [/\bemma\b/gi, 'Ecma'],
+  [/\beggman\b/gi, 'Ecma'],
   [/\ba key\b/gi, 'Aki'],
   [/\bpearl\b/gi, 'Perl'],
   [/\bbaht\b/gi, 'bot'],
@@ -78,6 +79,8 @@ const REPLACEMENTS = [
   [/\biffy\b/gi, 'IIFE'],
   [/\btubal\b/gi, 'tuple'],
   [/\bBR\b/gi, 'PR'],
+  [/\bbike shed\b/gi, 'bikeshed'],
+  [/\bbyte shed\b/gi, 'bikeshed'],
   [/\bbite\b/gi, 'byte'],
   [/\bbike\b/gi, 'byte'],
   [/\bbites\b/gi, 'bytes'],
@@ -91,10 +94,15 @@ const REPLACEMENTS = [
   [/\blip see\b/gi, 'libc'],
   [/\bx icon\b/gi, 'execom'],
   [/\bexact come\b/gi, 'execom'],
+  [/\bexact calm\b/gi, 'execom'],
+  [/\bwhat wig\b/gi, 'WHATWG'],
+  [/\blinks [fF]oundation\b/gi, 'Linux Foundation'],
+  [/\bga\b/gi, 'GA'],
   [/\bdalek\b/gi, 'dialect'],
   [/\bTG to\b/gi, 'TG2'],
   [/\btg2\b/gi, 'TG2'],
   [/\bteach you\b/gi, 'TG2'],
+  [/\bmou\b/gi, 'MOU'],
   [/\bpresidents\b/gi, 'precedence'],
   [/\bshoes\b/gi, "Shu's"],
   [/\bin fermentation\b/gi, 'implementation'],
@@ -108,7 +116,13 @@ const REPLACEMENTS = [
   [/\bgroup by\b/gi, 'groupBy'],
   [/\bEkman\b/gi, 'Ecma'],
   [/\bgaas\b/gi, "GA's"],
+  [/\bt[uo]pple\b/gi, 'Tuple'],
+  [/\bbigots\b/gi, 'BigInts'],
+  [/\bbig ants\b/gi, 'BigInts'],
+  [/\bstrokes\b/gi, 'structs'],
+  [/\bsherry buffers\b/gi, 'shared array buffers'],
 ];
+
 
 
 if (typeof ''.replaceAll !== 'function') {
