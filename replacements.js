@@ -60,6 +60,7 @@ const REPLACEMENTS = [
   [/\baquifer to\b/gi, 'Ecma 402'],
   [/\baquifers are two\b/gi, 'Ecma 402'],
   [/\bEcho 402\b/gi, 'Ecma 402'],
+  [/\bergonomic Fortune\b/gi, 'Ecma 402'],
   [/\bjays\b/gi, 'JS'],
   [/\bcldr\b/gi, 'CLDR'],
   [/\btempura\b/gi, 'Temporal'],
@@ -104,10 +105,12 @@ const REPLACEMENTS = [
   [/\bteach you\b/gi, 'TG2'],
   [/\bmou\b/gi, 'MOU'],
   [/\bpresidents\b/gi, 'precedence'],
+  [/\bpresident\b/gi, 'precedent'],
   [/\bshoes\b/gi, "Shu's"],
   [/\bin fermentation\b/gi, 'implementation'],
   [/\bprimordial ooze\b/gi, 'primordials'],
   [/\bspeck\b/gi, 'spec'],
+  [/\bSPAC\b/gi, 'spec'],
   [/\bGoebbels\b/gi, 'globals'],
   [/\bover aidable\b/gi, 'overwritable'],
   [/\ba ski\b/gi, 'ASCII'],
@@ -121,6 +124,11 @@ const REPLACEMENTS = [
   [/\bbig ants\b/gi, 'BigInts'],
   [/\bstrokes\b/gi, 'structs'],
   [/\bsherry buffers\b/gi, 'shared array buffers'],
+  [/\bnan\b/gi, 'NaN'],
+  [/\bsegment er\b/gi, 'segmenter'],
+  [/\bint'l\b/gi, 'Intl'],
+  [/\bkali\b/gi, 'callee'],
+  [/\bspider monkey\b/gi, 'SpiderMonkey'],
 ];
 
 
