@@ -129,6 +129,11 @@ const REPLACEMENTS = [
   [/\bint'l\b/gi, 'Intl'],
   [/\bkali\b/gi, 'callee'],
   [/\bspider monkey\b/gi, 'SpiderMonkey'],
+  [/\binterleaf\b/gi, 'interleave'],
+  [/\bconstellations\b/gi, 'const declarations'],
+  [/\b408\b/gi, 'for-await'],
+  [/\bdaytime\b/gi, 'date-time'],
+  [/\bvoldemort\b/gi, 'Waldemar'],
 ];
 
 
