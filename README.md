@@ -46,3 +46,10 @@ Keep in mind that this [costs money](https://cloud.google.com/speech-to-text/pri
 ## Transcribing audio from your computer
 
 This records audio _in_, not audio _out_. So it won't directly help with, e.g., transcribing a stream you're viewing on your computer. You'll need to use a tool like [JACK](https://jackaudio.org/) or [BlackHole](https://github.com/ExistentialAudio/BlackHole) (MacOS only) to route your audio out to your audio in.
+
+
+## Tip about delaying audio
+
+The point of this is to have _realtime_ transcriptions. My use case for that is so someone can be fixing up errors made by the STT service while they're in the meeting (or whatever) being transcribed, instead of needing to a whole additional chunk of time fixing it after the meeting (which may not be practical if a recording is not available).
+
+Unfortunately there's an inherent delay from the STT service, which means the transcript is necessarily going to be behind, so you have to constantly keep the last ~ten seconds in short-term memory. That's doable, but you may find it helpful to use a tool like [Rogue Amoeba's Audio Hijack](https://rogueamoeba.com/audiohijack/) to delay the audio from the meeting by a few seconds, to match the transcription. (That particular tool is Mac only. The feature you need is available in the unlimited free trial.) This is probably annoying if you're going to be speaking frequently, so I recommend only making use of this during portions of the meeting when you're not talking on the call.
