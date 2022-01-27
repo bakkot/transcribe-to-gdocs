@@ -32,7 +32,6 @@ const REPLACEMENTS = [
   [/\becmo\b/gi, 'Ecma'],
   [/\bemma\b/gi, 'Ecma'],
   [/\beggman\b/gi, 'Ecma'],
-  [/\ba key\b/gi, 'Aki'],
   [/\bpearl\b/gi, 'Perl'],
   [/\bbaht\b/gi, 'bot'],
   [/\bmodel blocks\b/gi, 'module blocks'],
@@ -80,6 +79,7 @@ const REPLACEMENTS = [
   [/\biffy\b/gi, 'IIFE'],
   [/\btubal\b/gi, 'tuple'],
   [/\bBR\b/gi, 'PR'],
+  [/\bPRS\b/gi, 'PRs'],
   [/\bbike shed\b/gi, 'bikeshed'],
   [/\bbyte shed\b/gi, 'bikeshed'],
   [/\bbite\b/gi, 'byte'],
@@ -88,8 +88,10 @@ const REPLACEMENTS = [
   [/\bQ\b/g, 'queue'],
   [/\bGlobal's\b/g, 'globals'],
   [/\bJulia\b/g, 'Yulia'],
+  [/\byou lea\b/g, 'Yulia'],
   [/\bMalik\b/gi, 'malloc'],
   [/\bwaldemar\b/g, 'Waldemar'],
+  [/\bvaldemar\b/g, 'Waldemar'],
   [/\bsegment er\b/gi, 'segmenter'],
   [/\bgraphene\b/gi, 'grapheme'],
   [/\blip see\b/gi, 'libc'],
@@ -134,8 +136,19 @@ const REPLACEMENTS = [
   [/\b408\b/gi, 'for-await'],
   [/\bdaytime\b/gi, 'date-time'],
   [/\bvoldemort\b/gi, 'Waldemar'],
+  [/\binnumerable\b/gi, 'enumerable'],
+  [/\btopples\b/gi, 'tuples'],
+  [/\btacos\b/gi, 'tuples'],
+  [/\bMarquis\b/gi, 'map keys'],
+  [/\bx markup\b/gi, 'ecmarkup'],
+  [/\bsugar ray\b/gi, 'shared array'],
+  [/\brapper\b/gi, 'wrapper'],
+  [/\bweek set\b/gi, 'WeakSet'],
+  [/\bweeks it\b/gi, 'WeakSet'],
+  [/\bweek max\b/gi, 'WeakMaps'],
+  [/\bwalmart\b/gi, 'Waldemar'],
+  [/\bbabble\b/gi, 'Babel'],
 ];
-
 
 
 if (typeof ''.replaceAll !== 'function') {
