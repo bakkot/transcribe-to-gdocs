@@ -148,6 +148,10 @@ const REPLACEMENTS = [
   [/\bweek max\b/gi, 'WeakMaps'],
   [/\bwalmart\b/gi, 'Waldemar'],
   [/\bbabble\b/gi, 'Babel'],
+  [/\bI so\b/gi, 'ISO'],
+  [/\btyped array\b/gi, 'TypedArray'],
+  [/\bsub-array\b/gi, 'subarray'],
+  [/\bno mutating\b/gi, 'non-mutating'],
 ];
 
 
