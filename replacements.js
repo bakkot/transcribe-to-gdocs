@@ -125,7 +125,7 @@ const REPLACEMENTS = [
   [/\bbigots\b/gi, 'BigInts'],
   [/\bbig ants\b/gi, 'BigInts'],
   [/\bstrokes\b/gi, 'structs'],
-  [/\bsherry buffers\b/gi, 'shared array buffers'],
+  [/\bsherry buffers\b/gi, 'SharedArrayBuffers'],
   [/\bnan\b/gi, 'NaN'],
   [/\bsegment er\b/gi, 'segmenter'],
   [/\bint'l\b/gi, 'Intl'],
@@ -152,6 +152,8 @@ const REPLACEMENTS = [
   [/\btyped array\b/gi, 'TypedArray'],
   [/\bsub-array\b/gi, 'subarray'],
   [/\bno mutating\b/gi, 'non-mutating'],
+  [/\bsin taxes\b/gi, 'syntaxes'],
+  [/\btypescript\b/gi, 'TypeScript'],
 ];
 
 
