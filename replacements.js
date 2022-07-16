@@ -150,10 +150,16 @@ const REPLACEMENTS = [
   [/\bbabble\b/gi, 'Babel'],
   [/\bI so\b/gi, 'ISO'],
   [/\btyped array\b/gi, 'TypedArray'],
+  [/\btype of raise\b/gi, 'TypedArrays'],
   [/\bsub-array\b/gi, 'subarray'],
   [/\bno mutating\b/gi, 'non-mutating'],
   [/\bsin taxes\b/gi, 'syntaxes'],
   [/\btypescript\b/gi, 'TypeScript'],
+  [/\bvenables\b/gi, 'thenables'],
+  [/\bpork rinds\b/gi, 'PR'],
+  [/\bthis pack\b/gi, 'the spec'],
+  [/\banatomic\b/gi, 'an atomic'],
+  [/\bacid\b/gi, 'asset'],
 ];
 
 
