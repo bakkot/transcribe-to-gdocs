@@ -3,12 +3,14 @@
 'use strict';
 
 let fs = require('fs').promises;
+let path = require('path');
+let process = require('process');
 let { readFileSync, writeFileSync } = require('fs');
 
 let { Writable } = require('stream');
 let recorder = require('node-record-lpcm16');
 let speech = require('@google-cloud/speech').v1p1beta1;
-let readline = require('readline');
+let { authenticate } = require('@google-cloud/local-auth');
 let { google } = require('googleapis');
 
 // TODO ask user to set this environment variable
@@ -16,23 +18,12 @@ let { google } = require('googleapis');
 process.env.GOOGLE_APPLICATION_CREDENTIALS = './speech-service-account-key.json';
 
 // this holds the docs API OAuth secret
-const GDOCS_APPLICATION_SECRET_PATH = './gdocs-client-oauth-secret.json';
+// needs to be a full path for google's dumb authenticate code to work
+const GDOCS_APPLICATION_SECRET_PATH = path.join(process.cwd(), '/gdocs-client-oauth-secret.json');
 
 // oauth token will be cached here
-const TOKEN_PATH = './GENERATED_TOKEN.json';
-
-function ask(question) {
-  let rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  return new Promise(res => {
-    rl.question(question, id => {
-      rl.close();
-      res(id);
-    });
-  });
-}
+const TOKEN_PATH = './GENERATED_TOKEN_2.json';
+const SCOPES = ['https://www.googleapis.com/auth/documents'];
 
 async function infiniteStream(
   append,
@@ -279,8 +270,7 @@ function reloadFixup() {
 }
 
 async function initGdocsClient(documentId) {
-  let secret = await fs.readFile(GDOCS_APPLICATION_SECRET_PATH, 'utf8');
-  let auth = await authorizeGdocsClient(JSON.parse(secret));
+  let auth = await authorizeGdocsClient();
 
   const docs = google.docs({ version: 'v1', auth });
 
@@ -344,26 +334,29 @@ async function initGdocsClient(documentId) {
   };
 }
 
-async function authorizeGdocsClient(credentials) {
-  let { client_secret, client_id, redirect_uris } = credentials.installed;
-  let oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
-
+async function authorizeGdocsClient() {
   try {
     let token = await fs.readFile(TOKEN_PATH, 'utf8');
-    oAuth2Client.setCredentials(JSON.parse(token));
+    return google.auth.fromJSON(JSON.parse(token));
   } catch {
-    let authUrl = oAuth2Client.generateAuthUrl({
-      access_type: 'offline',
-      scope: ['https://www.googleapis.com/auth/documents'],
+    let client = await authenticate({
+      scopes: SCOPES,
+      keyfilePath: GDOCS_APPLICATION_SECRET_PATH,
     });
-    console.log('Authorize this app by visiting this url:', authUrl);
-    let code = await ask('Enter the code from that page here: ');
+    if (!client.credentials) {
+      throw new Error('could not auth: no credentials');
+    }
+    let appCreds = JSON.parse(await fs.readFile(GDOCS_APPLICATION_SECRET_PATH, 'utf8'));
+    let key = appCreds.installed;
+    await fs.writeFile(TOKEN_PATH, JSON.stringify({
+      type: 'authorized_user',
+      client_id: key.client_id,
+      client_secret: key.client_secret,
+      refresh_token: client.credentials.refresh_token,
+    }), 'utf8');
 
-    let token = (await oAuth2Client.getToken(code)).tokens;
-    await fs.writeFile(TOKEN_PATH, JSON.stringify(token), 'utf8');
-    oAuth2Client.setCredentials(token);
+    return client;
   }
-  return oAuth2Client;
 }
 
 (async () => {
