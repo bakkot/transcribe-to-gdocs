@@ -22,7 +22,7 @@ process.env.GOOGLE_APPLICATION_CREDENTIALS = './speech-service-account-key.json'
 const GDOCS_APPLICATION_SECRET_PATH = path.join(process.cwd(), '/gdocs-client-oauth-secret.json');
 
 // oauth token will be cached here
-const TOKEN_PATH = './GENERATED_TOKEN_2.json';
+const TOKEN_PATH = './GENERATED_TOKEN.json';
 const SCOPES = ['https://www.googleapis.com/auth/documents'];
 
 async function infiniteStream(
