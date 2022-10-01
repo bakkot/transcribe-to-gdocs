@@ -41,7 +41,8 @@ async function infiniteStream(
     sampleRateHertz,
     languageCode,
     enableAutomaticPunctuation: true,
-    model: 'video', // NB this is 50% more expensive
+    // model: 'video', // NB this is 50% more expensive
+    model: 'latest_long',
   };
 
   let request = {
