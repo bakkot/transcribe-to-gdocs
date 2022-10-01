@@ -37,6 +37,7 @@ const REPLACEMENTS = [
   [/\becmo\b/gi, 'Ecma'],
   [/\bemma\b/gi, 'Ecma'],
   [/\beggman\b/gi, 'Ecma'],
+  [/\bx-men\b/gi, 'Ecma'],
   [/\bpearl\b/gi, 'Perl'],
   [/\bbaht\b/gi, 'bot'],
   [/\bmodel blocks\b/gi, 'module blocks'],
@@ -194,6 +195,18 @@ const REPLACEMENTS = [
   [/\binto balls\b/gi, 'and tuples'],
   [/\bUPS\b/gi, 'opts'],
   [/\bradar from\b/gi, 'Array.from'],
+  [/\btwo string\b/gi, 'toString'],
+  [/\btoo string\b/gi, 'toString'],
+  [/\brai\b/gi, 'RAII'],
+  [/\benthroned\b/gi, 'thrown'],
+  [/\bthroat completion\b/gi, 'throw completion'],
+  [/\bnun\b/gi, 'None'],
+  [/\brestructuring\b/gi, 'destructuring'],
+  [/\bbe structuring\b/gi, 'destructuring'],
+  [/\byou structuring\b/gi, 'destructuring'],
+  [/\bATT\b/gi, 'ADT'],
+  [/\bcash\b/gi, 'cache'],
+  [/\bplane\b/gi, 'plain'],
 ];
 
 
