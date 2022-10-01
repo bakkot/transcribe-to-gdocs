@@ -27,12 +27,7 @@ const SCOPES = ['https://www.googleapis.com/auth/documents'];
 
 async function infiniteStream(
   append,
-  {
-    encoding = 'LINEAR16',
-    sampleRateHertz = 16000,
-    languageCode = 'en-US',
-    streamingLimit = 290000,
-  } = {}
+  { encoding = 'LINEAR16', sampleRateHertz = 16000, languageCode = 'en-US', streamingLimit = 290000 } = {}
 ) {
   let client = new speech.SpeechClient();
 
@@ -41,6 +36,9 @@ async function infiniteStream(
     sampleRateHertz,
     languageCode,
     enableAutomaticPunctuation: true,
+    // enableSpeakerDiarization: true,
+    // diarizationSpeakerCount: 50,
+    // enableWordTimeOffsets: true,
     // model: 'video', // NB this is 50% more expensive
     model: 'latest_long',
   };
@@ -85,66 +83,50 @@ async function infiniteStream(
       }
       lock = true;
 
-      let next = queue.shift();
+      try {
+        // Unfortunately the gdocs API's claimed `targetRevisionId` thing does not work at all, so we're stuck with just appending.
+        let toAppend = '';
+        for (let [index, next] of queue.entries()) {
+          switch (next.type) {
+            case 'init':
+            case 'update': {
+              if (next.type === 'init') {
+                prevSkip = 0;
+              }
+              if (index < queue.length - 1) {
+                break;
+              }
+              let words = next.text.split(' ');
+              let text = words.slice(prevSkip);
+              if (text.length == 0) {
+                break;
+              }
+              prevSkip += text.length;
+              text = ' ' + text.join(' ').trim();
 
-      // Unfortunately the gdocs API's claimed `targetRevisionId` thing does not work at all, so we're stuck with just appending.
-      // The speech API doesn't finalize until a long time in, but early stuff tends not to change.
-      // So assume all but the last UNSTABLE_LEN words can be committed. Sometimes this leads to weird typos, but it's worth it to have transcripts be more live.
-      const UNSTABLE_LEN = 0;
-      switch (next.type) {
-        case 'init': {
-          let words = next.text.split(' ');
-          let text = words.slice(0, Math.max(0, words.length - UNSTABLE_LEN));
-          prevSkip = text.length;
-          text = ' ' + text.join(' ').trim();
-          console.log('init', JSON.stringify(next.text));
-          console.log('appending', JSON.stringify(text));
-          await append(text);
-          prev = text;
-          break;
-        }
-        case 'update': {
-          let words = next.text.split(' ');
-          let newInit = words.slice(0, prevSkip).join(' ');
-          let skipFirst = newInit.trim().length > prev.trim().length ? prevSkip - 1 : prevSkip;
-          if (newInit.trim().length > prev.trim().length) {
-            console.log('length mismatch');
-            console.log(JSON.stringify(newInit.trim()), JSON.stringify(prev.trim()));
+              toAppend += text;
+
+              break;
+            }
+            case 'finish': {
+              let words = next.text.split(' ');
+              let text = ' ' + words.slice(prevSkip).join(' ').trim();
+
+              console.log('finish', JSON.stringify(next.text));
+
+              toDisk(next.text);
+              toAppend += text;
+              prevSkip = 0;
+              break;
+            }
           }
-          let text = words.slice(skipFirst, Math.max(skipFirst, words.length - UNSTABLE_LEN));
-          if (text.length == 0) {
-            break;
-          }
-          prevSkip += text.length;
-          text = ' ' + text.join(' ').trim();
-
-          console.log('update', JSON.stringify(next.text));
-          console.log('appending', JSON.stringify(text));
-          await append(text);
-          prev += text;
-
-          break;
         }
-        case 'finish': {
-          let words = next.text.split(' ');
-          let newInit = words.slice(0, prevSkip).join(' ');
-          let skipFirst = newInit.trim().length > prev.trim().length ? prevSkip - 1 : prevSkip;
-          let text = ' ' + words.slice(skipFirst, words.length).join(' ').trim();
-
-          console.log('finish', JSON.stringify(next.text));
-          console.log('appending', JSON.stringify(text));
-          if (!text.startsWith(' ')) {
-            text = ' ' + text;
-          }
-
-          toDisk(next.text);
-          await append(text);
-          prev = '';
-          break;
-        }
+        queue = [];
+        console.log('appending', JSON.stringify(toAppend));
+        await append(toAppend);
+      } finally {
+        lock = false;
       }
-
-      lock = false;
     }, 1100);
 
     let shouldInit = true;
@@ -153,6 +135,7 @@ async function infiniteStream(
       if (stream.results[0].alternatives[0]) {
         stdoutText = stream.results[0].alternatives[0].transcript;
       }
+      // console.log(require('util').inspect(stream.results, { depth: Infinity }));
       if (stream.results[0].isFinal) {
         queue.push({ type: 'finish', text: stdoutText });
         shouldInit = true;
@@ -302,22 +285,10 @@ async function initGdocsClient(documentId) {
     }
   }
 
-  // the "words" thing is a hack to avoid duplicates
-  // it would be better to deal with it more comphrensively at the use sites of this function
-  let lastWord = null;
   return async text => {
     if (text.trim() === '') {
       return;
     }
-    let words = text.split(/\b/);
-    if (words[1] === lastWord) { // we always start with a ' '.
-      text = text.substring(words[0].length + words[1].length);
-    }
-    if (text.trim() === '') {
-      return;
-    }
-    words = text.split(/\b/);
-    lastWord = words[words.length - 1];
     await docs.documents.batchUpdate({
       documentId,
       requestBody: {
@@ -350,12 +321,16 @@ async function authorizeGdocsClient() {
     }
     let appCreds = JSON.parse(await fs.readFile(GDOCS_APPLICATION_SECRET_PATH, 'utf8'));
     let key = appCreds.installed;
-    await fs.writeFile(TOKEN_PATH, JSON.stringify({
-      type: 'authorized_user',
-      client_id: key.client_id,
-      client_secret: key.client_secret,
-      refresh_token: client.credentials.refresh_token,
-    }), 'utf8');
+    await fs.writeFile(
+      TOKEN_PATH,
+      JSON.stringify({
+        type: 'authorized_user',
+        client_id: key.client_id,
+        client_secret: key.client_secret,
+        refresh_token: client.credentials.refresh_token,
+      }),
+      'utf8'
+    );
 
     return client;
   }
