@@ -194,6 +194,7 @@ const REPLACEMENTS = [
   [/\binto balls\b/gi, 'and tuples'],
   [/\bUPS\b/gi, 'opts'],
   [/\bradar from\b/gi, 'Array.from'],
+  [/\bmodule intense\b/gi, 'Module instance'],
 ];
 
 
