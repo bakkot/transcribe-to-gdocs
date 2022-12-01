@@ -27,7 +27,13 @@ const SCOPES = ['https://www.googleapis.com/auth/documents'];
 
 async function infiniteStream(
   append,
-  { encoding = 'LINEAR16', sampleRateHertz = 16000, languageCode = 'en-US', streamingLimit = 290000 } = {}
+  {
+    encoding = 'LINEAR16',
+    sampleRateHertz = 16000,
+    languageCode = 'en-US',
+    streamingLimit = 290_000 /* ms */, // no more than 300000 i.e. 5 minutes
+    // streamingLimit = 60_000 /* ms */,
+  } = {}
 ) {
   let client = new speech.SpeechClient();
 
@@ -36,11 +42,12 @@ async function infiniteStream(
     sampleRateHertz,
     languageCode,
     enableAutomaticPunctuation: true,
+    profanityFilter: true,
     // enableSpeakerDiarization: true,
     // diarizationSpeakerCount: 50,
     // enableWordTimeOffsets: true,
-    // model: 'video', // NB this is 50% more expensive
-    model: 'latest_long',
+    model: 'video', // NB this is 50% more expensive
+    // model: 'latest_long',
   };
 
   let request = {
