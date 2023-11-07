@@ -9,7 +9,7 @@ let { readFileSync, writeFileSync } = require('fs');
 
 let { Writable } = require('stream');
 let recorder = require('node-record-lpcm16');
-let speech = require('@google-cloud/speech').v1p1beta1;
+let speech = require('@google-cloud/speech').v2;
 let { authenticate } = require('@google-cloud/local-auth');
 let { google } = require('googleapis');
 
@@ -21,6 +21,9 @@ process.env.GOOGLE_APPLICATION_CREDENTIALS = './speech-service-account-key.json'
 // needs to be a full path for google's dumb authenticate code to work
 const GDOCS_APPLICATION_SECRET_PATH = path.join(process.cwd(), '/gdocs-client-oauth-secret.json');
 
+const appCreds = JSON.parse(readFileSync(GDOCS_APPLICATION_SECRET_PATH, 'utf8'));
+const { project_id } = appCreds.installed;
+
 // oauth token will be cached here
 const TOKEN_PATH = './GENERATED_TOKEN.json';
 const SCOPES = ['https://www.googleapis.com/auth/documents'];
@@ -28,48 +31,58 @@ const SCOPES = ['https://www.googleapis.com/auth/documents'];
 async function infiniteStream(
   append,
   {
-    encoding = 'LINEAR16',
     sampleRateHertz = 16000,
-    languageCode = 'en-US',
     streamingLimit = 290_000 /* ms */, // no more than 300000 i.e. 5 minutes
     // streamingLimit = 60_000 /* ms */,
   } = {}
 ) {
   let client = new speech.SpeechClient();
 
-  let config = {
-    encoding,
-    sampleRateHertz,
-    languageCode,
-    enableAutomaticPunctuation: true,
-    profanityFilter: true,
-    // enableSpeakerDiarization: true,
-    // diarizationSpeakerCount: 50,
-    // enableWordTimeOffsets: true,
-    model: 'video', // NB this is 50% more expensive
-    // model: 'latest_long',
+  const recognitionConfig = {
+    // autoDecodingConfig removes the need to specify audio encoding.
+    // This field only needs to be present in the recognitionConfig
+    autoDecodingConfig: {},
+    languageCodes: ['en-US'],
+    model: 'latest_long',
+    features: {
+      profanityFilter: true,
+      enableAutomaticPunctuation: true,
+    },
+  };
+  const streamingConfig = {
+    config: recognitionConfig,
+    streamingFeatures: {
+      interimResults: true,
+    },
   };
 
-  let request = {
-    config,
-    interimResults: true,
+  const configRequest = {
+    // default recognizer https://cloud.google.com/speech-to-text/v2/docs/recognizers#send_requests_without_recognizers
+    recognizer: `projects/${project_id}/locations/global/recognizers/_`,
+    streamingConfig: streamingConfig,
   };
 
   let recognizeStream = null;
   let restartCounter = 0;
   let deferredChunks = [];
 
+
   function startStream() {
     recognizeStream = client
-      .streamingRecognize(request)
+      ._streamingRecognize() // yes, with the underscore, for some reason
       .on('error', err => {
         if (err.code === 11) {
           // restartStream();
         } else {
+          console.log(err);
           console.error('API request error ' + err);
+          process.exit(1);
         }
       })
       .on('data', getSpeechCallback());
+
+    // https://github.com/GoogleCloudPlatform/nodejs-docs-samples/blob/main/speech/transcribeStreaming.v2.js#L68
+    recognizeStream.write(configRequest);
 
     setTimeout(restartStream, streamingLimit);
   }
@@ -164,11 +177,12 @@ async function infiniteStream(
       if (recognizeStream) {
         if (deferredChunks.length > 0) {
           for (let chunk of deferredChunks) {
-            recognizeStream.write(chunk);
+            // yes, it wants json+base64 data; no I don't know why
+            recognizeStream.write({ audio: chunk.toString('base64') });
           }
           deferredChunks = [];
         }
-        recognizeStream.write(chunk);
+        recognizeStream.write({ audio: chunk.toString('base64') });
       } else {
         deferredChunks.push(chunk);
       }
@@ -326,7 +340,6 @@ async function authorizeGdocsClient() {
     if (!client.credentials) {
       throw new Error('could not auth: no credentials');
     }
-    let appCreds = JSON.parse(await fs.readFile(GDOCS_APPLICATION_SECRET_PATH, 'utf8'));
     let key = appCreds.installed;
     await fs.writeFile(
       TOKEN_PATH,
