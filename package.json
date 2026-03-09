@@ -1,8 +1,10 @@
 {
   "type": "module",
   "dependencies": {
+    "@google-cloud/local-auth": "^3.0.1",
     "@soniox/node": "^1.1.2",
     "@types/node": "^25.4.0",
+    "googleapis": "^128.0.0",
     "node-record-lpcm16": "^1.0.1",
     "typescript": "^5.9.3"
   }
