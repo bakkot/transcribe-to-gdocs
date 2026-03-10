@@ -10,6 +10,21 @@ const REPLACEMENTS = [
   [/\bgalia\b/gi, 'Igalia'],
   [/\begalia\b/gi, 'Igalia'],
   [/\bNan\b/gi, 'NaN'],
+  [/\bFukara\b/gi, 'Ficarra'],
+  [/\bMiner\b/gi, 'Minor'],
+  [/\bUPCERT\b/gi, 'Upsert'],
+  [/\bNicola\b/gi, 'NRO'],
+  [/\bMikkel\b/gi, 'Mikhail'],
+  [/\bDom\b/gi, 'DOM'],
+  [/\bBuxton\b/gi, 'Buckton'],
+  [/\btwo-string\b/gi, 'toString'],
+  [/\bsealed yard\b/gi, 'CLDR'],
+  [/\bemily\b/gi, 'EAO'],
+  [/\bshared array buffer\b/gi, 'SharedArrayBuffer'],
+  [/\bshared array buffers\b/gi, 'SharedArrayBuffers'],
+  [/\barray buffer\b/gi, 'ArrayBuffer'],
+  [/\barray buffers\b/gi, 'ArrayBuffers'],
+  [/\bShenzong\b/gi, 'CZW'],
 ];
 
 function makeReplacements(text) {
