@@ -4,15 +4,15 @@ import { initGdocsClient } from './write-to-gdocs.ts';
 import { transcribeMicrophone } from './transcribe.ts';
 import { fixup } from './fixup.ts';
 
-const { positionals: argv } = parseArgs({ allowPositionals: true });
+const { positionals: argv, values } = parseArgs({ allowPositionals: true, options: { tab: { type: 'string' } } });
 if (argv.length !== 1) {
-  console.error('provide the doc ID as an argument');
+  console.error('usage: node run.ts docid [--tab "tab name"]');
   process.exit(1);
 }
 const [docId] = argv;
 
 
-const write = await initGdocsClient(docId);
+const write = await initGdocsClient(docId, values.tab);
 
 let writing: Promise<void> | null = null;
 let queue = '';

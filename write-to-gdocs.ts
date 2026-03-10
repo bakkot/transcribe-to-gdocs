@@ -52,14 +52,27 @@ async function authorizeGdocsClient() {
   }
 }
 
-export async function initGdocsClient(documentId: string) {
+export async function initGdocsClient(documentId: string, tabName?: string) {
   let auth = await authorizeGdocsClient();
 
   const docs = google.docs({ version: 'v1', auth });
 
+  let tabId: string | undefined = undefined;
+
+  if (tabName != null) {
+    // @ts-expect-error we are using an old version of the googleapis package because I couldn't figure out auth on the newer one
+    const doc = await docs.documents.get({ documentId, includeTabsContent: true });
+    // @ts-expect-error
+    tabId = doc.data.tabs.map(x => x.tabProperties).find(t => t.title === tabName)?.tabId;
+    if (tabId == null) {
+      throw new Error(`could not find tab ${JSON.stringify(tabName)}`);
+    }
+  }
+
   try {
     // The API doesn't seem to expose permissions queries
     // So test for writing permissions by writing the empty string to the end of the document
+    // @ts-expect-error
     await docs.documents.batchUpdate({
       documentId,
       requestBody: {
@@ -69,6 +82,7 @@ export async function initGdocsClient(documentId: string) {
               text: '',
               endOfSegmentLocation: {
                 segmentId: '',
+                tabId,
               },
             },
           },
@@ -84,6 +98,7 @@ export async function initGdocsClient(documentId: string) {
   }
 
   return async (text: string) => {
+    // @ts-expect-error
     await docs.documents.batchUpdate({
       documentId,
       requestBody: {
@@ -93,6 +108,7 @@ export async function initGdocsClient(documentId: string) {
               text,
               endOfSegmentLocation: {
                 segmentId: '',
+                tabId,
               },
             },
           },
