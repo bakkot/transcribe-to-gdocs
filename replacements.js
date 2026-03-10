@@ -3,7 +3,7 @@
 // This list is specialized for TC39. It may not make sense for your application.
 const REPLACEMENTS = [
   [/\bsho(?:e|ot?)\b/gi, 'Shu'],
-  [/\b(, )?u(h|m),?\b/gi, ''],
+  [/\b(, )?u(h|m),?(?= |$)/gi, ''],
   [/\bIntel\b/gi, 'Intl'],
   [/\bagalya\b/gi, 'Igalia'],
   [/\bregalia\b/gi, 'Igalia'],

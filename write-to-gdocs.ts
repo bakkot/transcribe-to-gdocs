@@ -21,32 +21,6 @@ const appCreds = JSON.parse(fs.readFileSync(GDOCS_APPLICATION_SECRET_PATH, 'utf8
 const TOKEN_PATH = path.join(import.meta.dirname, 'GENERATED_TOKEN.json');
 const SCOPES = ['https://www.googleapis.com/auth/documents'];
 
-let lastGoodReplacements = '';
-let lastBadReplacements = '';
-let fixup = (x: string) => x;
-function reloadFixup() {
-  let src = fs.readFileSync('./replacements.js', 'utf8');
-  if (src === lastGoodReplacements || src === lastBadReplacements) {
-    return true;
-  }
-  try {
-    let newFixup = (0, eval)(src);
-    if (typeof newFixup !== 'function') {
-      lastBadReplacements = src;
-      console.error(`Failed to load replacements.js: expecting function, got ${typeof newFixup}`);
-      return false;
-    }
-    fixup = newFixup;
-    lastGoodReplacements = src;
-    console.log('(reloaded replacements.js)');
-    return true;
-  } catch (e) {
-    lastBadReplacements = src;
-    console.error(`Failed to load replacements.js: error evaling file`);
-    console.error(e);
-    return false;
-  }
-}
 
 async function authorizeGdocsClient() {
   try {
@@ -79,11 +53,6 @@ async function authorizeGdocsClient() {
 }
 
 export async function initGdocsClient(documentId: string) {
-  if (!reloadFixup()) {
-    // if this happens once we're running we should tolerate it, but here we can afford to require it to work
-    throw new Error('failed to load replacements');
-  }
-  setInterval(reloadFixup, 2000);
   let auth = await authorizeGdocsClient();
 
   const docs = google.docs({ version: 'v1', auth });
@@ -115,16 +84,13 @@ export async function initGdocsClient(documentId: string) {
   }
 
   return async (text: string) => {
-    if (text.trim() === '') {
-      return;
-    }
     await docs.documents.batchUpdate({
       documentId,
       requestBody: {
         requests: [
           {
             insertText: {
-              text: fixup(text),
+              text,
               endOfSegmentLocation: {
                 segmentId: '',
               },

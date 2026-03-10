@@ -30,15 +30,17 @@ const config: SttSessionConfig = {
 };
 
 // mixes in logic for splitting speakers, etc, because I don't care
-export async function stream(callback: (text: string) => void) {
+export async function transcribeMicrophone(callback: (text: string) => void) {
   const session = client.realtime.stt(config);
 
   let buff = '';
   function flush(text: string) {
     buff += text;
-    const match = buff.match(/^(.*\s)(\S*)$/);
+    if (buff == '') return;
+    // console.log(JSON.stringify(buff));
+    const match = buff.match(/^(.*[^A-Za-z0-9])([A-Za-z0-9]*)$/s);
     if (match) {
-      console.log(match[1]);
+      callback(match[1]);
       buff = match[2];
     }
   }
@@ -50,6 +52,7 @@ export async function stream(callback: (text: string) => void) {
       if (token.is_final) {
         if (token.speaker !== speaker) {
           flush(res + '\n\n');
+          res = '';
           speaker = token.speaker;
         }
         res += token.text;
@@ -63,7 +66,6 @@ export async function stream(callback: (text: string) => void) {
     console.error('Session error:', err);
   });
 
-  console.log('Connecting to Soniox...');
   await session.connect();
   console.log('Session started.');
 
