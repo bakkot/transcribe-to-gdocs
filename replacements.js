@@ -2,9 +2,10 @@
 
 // This list is specialized for TC39. It may not make sense for your application.
 const REPLACEMENTS = [
+  [/(?:\b(?:uh|um)\b[,\s]*)+(.)?/gi, (match, nextChar) => match[0] === 'U' && nextChar ? nextChar.toUpperCase() : (nextChar || '')],
   [/\bsho(?:e|ot?)\b/gi, 'Shu'],
-  [/\b(, )?u(h|m),?(?= |$)/gi, ''],
   [/\bIntel\b/gi, 'Intl'],
+  [/\btemporal\b/gi, 'Temporal'],
   [/\bagalya\b/gi, 'Igalia'],
   [/\bregalia\b/gi, 'Igalia'],
   [/\bgalia\b/gi, 'Igalia'],
