@@ -36,9 +36,14 @@ transcribeMicrophone(async (text: string) => {
           } else {
             console.log(`${JSON.stringify(orig)} -> ${JSON.stringify(queue)}`);
           }
+          let start = Date.now();
           writing = write(queue);
           queue = '';
           await writing;
+          let diff = Date.now() - start;
+          if (diff > 5000) {
+            console.log(`!! long docs post: ${Math.floor(diff/1000)} seconds`);
+          }
         }
       } finally {
         writing = null;
