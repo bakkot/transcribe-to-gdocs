@@ -46,7 +46,21 @@ const REPLACEMENTS = [
   [/\b(the|in|a|if|of|is|how|or|I|on|what|it's|and|to), \1(?:, \1)*\b/gi, '$1'],
 ];
 
+// used to track whether we need to capitalize the next segment
+let endsWithFiller = false;
+
 function makeReplacements(text) {
+  if (endsWithFiller) {
+    let idx = 0;
+    if (text[0] === ' ') {
+      idx = 1;
+    }
+    if (/[a-z]/.test(text[idx] ?? '')) {
+      text = ((idx === 1) ? ' ' : '') + text[idx].toUpperCase() + text.slice(idx + 1);
+    }
+  }
+  endsWithFiller = /\bU[m], ?$/.test(text);
+
   for (let args of REPLACEMENTS) {
     text = text.replaceAll.apply(text, args);
   }
