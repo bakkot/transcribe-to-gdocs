@@ -14,6 +14,8 @@ Have node installed.
 
 `npm install` to install dependencies. This intentionally pins a rather outdated version of the `googleapis` package because I couldn't figure out how to do authentication with the newer one, sorry.
 
+You will also need to figure out how to route your audio out to your audio in, because this only transcribes your audio in (with [`node-record-lpcm16`](https://www.npmjs.com/package/node-record-lpcm16) wrapping `rec`). On MacOS I use the excellent [BlackHole Audio](https://github.com/ExistentialAudio/BlackHole) tool.
+
 ### Google
 
 (Note: these instructions are old and Google changes their pages distressingly often. This may no longer be the process. The goal is to create a project and an OAuth client such that you have a `.json` with `"installed": { "client_id": ..., "client_secret": ..., ... }`.)

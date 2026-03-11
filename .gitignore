@@ -2,3 +2,4 @@ node_modules/
 *_KEY.txt
 GENERATED_TOKEN.json
 gdocs-client-oauth-secret.json
+backup*.txt

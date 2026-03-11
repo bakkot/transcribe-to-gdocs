@@ -1,4 +1,5 @@
 import { parseArgs } from 'node:util';
+import fs from 'node:fs';
 
 import { initGdocsClient } from './write-to-gdocs.ts';
 import { transcribeMicrophone } from './transcribe.ts';
@@ -17,7 +18,10 @@ const write = await initGdocsClient(docId, values.tab);
 let writing: Promise<void> | null = null;
 let queue = '';
 
+let backup = fs.createWriteStream(`backup ${(new Date).toISOString().replace('T', ' ').replace(/:/g, '-').slice(0, 19)}.txt`, { flags:'a' });
+
 transcribeMicrophone(async (text: string) => {
+  backup.write(text);
   queue += text;
   // avoid simultaneous writes because they can race
   if (!writing) {

@@ -6,6 +6,9 @@ const REPLACEMENTS = [
   [/\bsho(?:e|ot?)\b/gi, 'Shu'],
   [/\bIntel\b/gi, 'Intl'],
   [/\btemporal\b/gi, 'Temporal'],
+  [/\bplain ?time\b/gi, 'PlainTime'],
+  [/\bplain ?date\b/gi, 'PlainDate'],
+  [/\btest262\b/gi, 'Test262'],
   [/\bagalya\b/gi, 'Igalia'],
   [/\bregalia\b/gi, 'Igalia'],
   [/\bgalia\b/gi, 'Igalia'],
@@ -13,6 +16,9 @@ const REPLACEMENTS = [
   [/\bNan\b/gi, 'NaN'],
   [/\bFukara\b/gi, 'Ficarra'],
   [/\bMiner\b/gi, 'Minor'],
+  [/\bValdemar\b/gi, 'Waldemar'],
+  [/\bSemina\b/gi, 'Samina'],
+  [/\bANBA\b/gi, 'Anba'],
   [/\bUPCERT\b/gi, 'Upsert'],
   [/\bNicola\b/gi, 'NRO'],
   [/\bMikkel\b/gi, 'Mikhail'],
@@ -26,6 +32,7 @@ const REPLACEMENTS = [
   [/\barray buffer\b/gi, 'ArrayBuffer'],
   [/\barray buffers\b/gi, 'ArrayBuffers'],
   [/\bShenzong\b/gi, 'CZW'],
+  [/\bCheng Song\b/gi, 'CZW'],
 ];
 
 function makeReplacements(text) {
