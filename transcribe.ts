@@ -64,6 +64,7 @@ export async function transcribeMicrophone(callback: (text: string) => void) {
 
   session.on('error', (err) => {
     console.error('Session error:', err);
+    process.exit(1);
   });
 
   await session.connect();

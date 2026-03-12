@@ -6,7 +6,9 @@ const REPLACEMENTS = [
   [/\bsho(?:e|ot?)\b/gi, 'Shu'],
   [/\bIntel\b/gi, 'Intl'],
   [/\btemporal\b/gi, 'Temporal'],
-  [/\bsymbol\b/gi, 'Symbol'],
+  [/\bsymbol(s)?\b/gi, 'Symbol$1'],
+  [/\bpromise(s)?\b/gi, 'Promise$1'],
+  [/\bproxy\b/gi, 'Proxy'],
   [/\bplain ?time\b/gi, 'PlainTime'],
   [/\bplain ?date\b/gi, 'PlainDate'],
   [/\btest262\b/gi, 'Test262'],
@@ -16,6 +18,7 @@ const REPLACEMENTS = [
   [/\begalia\b/gi, 'Igalia'],
   [/\bNan\b/gi, 'NaN'],
   [/\bFukara\b/gi, 'Ficarra'],
+  [/\bPekara\b/gi, 'Ficarra'],
   [/\bMiner\b/gi, 'Minor'],
   [/\bValdemar\b/gi, 'Waldemar'],
   [/\bSemina\b/gi, 'Samina'],
@@ -31,6 +34,7 @@ const REPLACEMENTS = [
   [/\bsealed yard\b/gi, 'CLDR'],
   [/\bemily\b/gi, 'EAO'],
   [/\boliviay\b/gi, 'OFR'],
+  [/\bolivia\b/gi, 'OFR'],
   [/\bshared array buffer\b/gi, 'SharedArrayBuffer'],
   [/\bshared array buffers\b/gi, 'SharedArrayBuffers'],
   [/\barray buffer\b/gi, 'ArrayBuffer'],
@@ -40,16 +44,26 @@ const REPLACEMENTS = [
   [/\bZhengzheng\b/gi, 'CZW'],
   [/\bwanna\b/gi, 'want to'],
   [/\bgonna\b/gi, 'going to'],
+  [/\bkinda\b/gi, 'kind of'],
+  [/\bSPIES\b/gi, 'spies'],
+  [/\bSPIE\b/gi, 'spy'],
+  [/\bcue\b/gi, 'queue'],
+  [/\bvenable\b/gi, 'venable'],
   [/\bmodible\b/gi, 'Moddable'],
   [/\bmodibles\b/gi, 'Moddable\'s'],
-  [/\b, you know,\b/gi, ','],
-  [/\b(the|in|a|if|of|is|how|or|I|on|what|it's|and|to), \1(?:, \1)*\b/gi, '$1'],
+  [/, you know,/gi, ','],
+  [/\b(and|but|the|in|a|if|of|their|my|this|is|are|how|or|I|I'll|I'm|we|we're|on|what|it|it's|and|to|just), \1(?:, \1)*\b/gi, '$1'],
 ];
 
 // used to track whether we need to capitalize the next segment
 let endsWithFiller = false;
 
+let endsWithSpace = false;
 function makeReplacements(text) {
+  if (endsWithSpace && text[0] === ' ') {
+    text = text.slice(1);
+  }
+
   if (endsWithFiller) {
     let idx = 0;
     if (text[0] === ' ') {
@@ -59,11 +73,13 @@ function makeReplacements(text) {
       text = ((idx === 1) ? ' ' : '') + text[idx].toUpperCase() + text.slice(idx + 1);
     }
   }
-  endsWithFiller = /\bU[m], ?$/.test(text);
+  endsWithFiller = /\bU[mh], ?$/.test(text);
 
   for (let args of REPLACEMENTS) {
     text = text.replaceAll.apply(text, args);
   }
+
+  endsWithSpace = text.endsWith(' ');
   return text;
 }
 
