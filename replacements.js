@@ -48,7 +48,7 @@ const REPLACEMENTS = [
   [/\bSPIES\b/gi, 'spies'],
   [/\bSPIE\b/gi, 'spy'],
   [/\bcue\b/gi, 'queue'],
-  [/\bvenable\b/gi, 'venable'],
+  [/\bvenable\b/gi, 'thenable'],
   [/\bmodible\b/gi, 'Moddable'],
   [/\bmodibles\b/gi, 'Moddable\'s'],
   [/, you know,/gi, ','],
