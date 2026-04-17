@@ -16,6 +16,10 @@ Have node installed.
 
 If you want to record meetings or other audio playing from your computer, you will also need to figure out how to route your audio out to your audio in, because this only transcribes your audio in (with [`node-record-lpcm16`](https://www.npmjs.com/package/node-record-lpcm16) wrapping `rec`). On MacOS I use the excellent [BlackHole Audio](https://github.com/ExistentialAudio/BlackHole) tool.
 
+If you want to also listen to the meeting on the same computer, you'll need [a multi-output device](https://github.com/ExistentialAudio/BlackHole/wiki/Multi-Output-Device), which on MacOS you can do with built-in tools.
+
+I don't have a good solution for also transcribing your actual microphone so you can participate and be transcribed as well. Technically this is easy to do with [an aggregate input device](https://github.com/ExistentialAudio/BlackHole/wiki/Aggregate-Device), but this will add your audio stream to the transcript even when you aren't actively participating (i.e., it's not conditioned on you being unmuted in the meeting, because it has no awareness of the meeting). If you have a hardware switch for your mic this could be OK. I just use a second computer.
+
 ### Google
 
 (Note: these instructions are old and Google changes their pages distressingly often. This may no longer be the process. The goal is to create a project and an OAuth client such that you have a `.json` with `"installed": { "client_id": ..., "client_secret": ..., ... }`.)
