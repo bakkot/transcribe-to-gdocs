@@ -10,9 +10,9 @@ If you don't need the ability to edit transcripts in realtime, you may prefer to
 
 ### Local
 
-Have node installed.
+Have node installed. Have `sox` or `sox_ng` installed, and have the provided `rec` binary on your path.
 
-`npm install` to install dependencies. This intentionally pins a rather outdated version of the `googleapis` package because I couldn't figure out how to do authentication with the newer one, sorry.
+`npm install` to install project dependencies. This intentionally pins a rather outdated version of the `googleapis` package because I couldn't figure out how to do authentication with the newer one, sorry.
 
 If you want to record meetings or other audio playing from your computer, you will also need to figure out how to route your audio out to your audio in, because this only transcribes your audio in (with [`node-record-lpcm16`](https://www.npmjs.com/package/node-record-lpcm16) wrapping `rec`). On MacOS I use the excellent [BlackHole Audio](https://github.com/ExistentialAudio/BlackHole) tool.
 
