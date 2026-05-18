@@ -55,7 +55,7 @@ Sign up on [their website](https://soniox.com/), enable billing, give it some mo
 
 ## Running
 
-`node run.ts doc_id [--tab "tab name"]`
+`./run.sh doc_id [--tab "tab name"]`
 
 The `doc_id` is the `1fOSJp9hZLoR2BhiE0da87bLtoBBgcvGdi063IU1wqW8` part of doc's URL, as in `https://docs.google.com/document/d/1fOSJp9hZLoR2BhiE0da87bLtoBBgcvGdi063IU1wqW8/edit`. Make sure it's a document you have permission to edit.
 
@@ -64,5 +64,3 @@ The tab name is optional; if omitted it will write to the first tab.
 The first time you run it, or if you haven't used it in a while, it should pop up a browser window to ask you to grant access. It will have a big "Google hasn’t verified this app" warning you can click through by clicking "advanced" then "go to (your app)". The subsequent permissions screen should ask for permissions to "See, edit, create, and delete all your Google Docs documents" and no other permissions if you followed the instructions above. Grant it and you should be up and running.
 
 Text will be printed to the console as it runs, and should be appearing in the specified tab of the specified document. If the transcription makes a particular error repeatedly, you can add replacement rules in `relacements.js`. This file is automatically reloaded every few seconds.
-
-Sometimes the stream just dies for no discernible reason, so I run it in a loop with `while true; do [run the thing]; sleep 1; done`. (Don't forget the `sleep 1` so you can still C-c it.)
