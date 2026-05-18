@@ -10,9 +10,9 @@ If you don't need the ability to edit transcripts in realtime, you may prefer to
 
 ### Local
 
-Have node installed.
+Have node installed. Have `sox` or `sox_ng` installed, and have the provided `rec` binary on your path.
 
-`npm install` to install dependencies. This intentionally pins a rather outdated version of the `googleapis` package because I couldn't figure out how to do authentication with the newer one, sorry.
+`npm install` to install project dependencies. This intentionally pins a rather outdated version of the `googleapis` package because I couldn't figure out how to do authentication with the newer one, sorry.
 
 If you want to record meetings or other audio playing from your computer, you will also need to figure out how to route your audio out to your audio in, because this only transcribes your audio in (with [`node-record-lpcm16`](https://www.npmjs.com/package/node-record-lpcm16) wrapping `rec`). On MacOS I use the excellent [BlackHole Audio](https://github.com/ExistentialAudio/BlackHole) tool.
 
@@ -22,17 +22,36 @@ I don't have a good solution for also transcribing your actual microphone so you
 
 ### Google
 
-(Note: these instructions are old and Google changes their pages distressingly often. This may no longer be the process. The goal is to create a project and an OAuth client such that you have a `.json` with `"installed": { "client_id": ..., "client_secret": ..., ... }`.)
+(Note: Google changes their pages distressingly often. This may no longer be the process. The goal is to create a project and an OAuth client such that you have a `.json` with `"installed": { "client_id": ..., "client_secret": ..., ... }` and your project has the Docs API enabled and asks for the `.../auth/documents` scope.)
 
-Create a Google Cloud project and enable the Google Docs API for your project. You can do this from the [APIs & Services](https://console.developers.google.com/apis/dashboard) page on the Cloud console. Make sure you're in the right project at the top, then click "Enable APIs and Services", search for the Google Docs API, and click Enable.
-
-Set up the app to allow users to grant it permission to edit documents on their behalf. From the [APIs & Services](https://console.developers.google.com/apis/dashboard) page, click "OAuth Consent Screen" in the left menu, click "Clients", then "Create client", then pick type "Desktop app". Click "Download Provide a name and email to be displayed to users and a developer contact, then click Save and Continue. On the Scopes page, select the ".../auth/documents" scope ("View and manage your Google Docs documents"). Ignore the warning about verification for now. Click Save and Continue until you get to the Summary page. Don't worry about registration for now, just click Back to Dashboard.
-
-Finally, acquire the OAuth secret for your application. From the [APIs & Services](https://console.developers.google.com/apis/dashboard), select "Credentials", click Create Credentials at the top, select "OAuth Client ID", set the type to "Desktop app", give it a name, and click "create". It will tell you the ID and secret, but it's easier to download the full JSON. Save it to a file named `gdocs-client-oauth-secret.json` in this directory.
+1. go here: https://console.cloud.google.com/apis/library
+1. make sure you're in the google account you want to use
+1. create a new google cloud project (or select it if already created)
+1. search for the Google Docs API, click on it, then click Enable
+1. on the left pane, click 'OAuth Consent Screen'
+1. click 'Clients'
+1. click 'Get Started'
+1. enter a name for the app and select a support email, then click 'Next'
+1. select 'External' audience, then click 'Next'
+1. enter a contact email, then click 'Next', 'Continue', then 'Create'
+1. on the left pane, click 'Data Access'
+1. click 'Add or remove scopes'
+1. change 'Rows per page' to 100
+1. find '.../auth/documents', click the checkbox for it, and click 'Update' at the bottom
+1. click 'Save' at the bottom
+1. on the left pane, 'Audience'
+1. scroll down to 'Test users' and click 'Add users' (probably only necessary if not your account)
+1. add the google account you want to use for the app and click 'Save'
+1. click the hamburger menu icon in the top left and click 'APIs & Services'
+1. click 'Credentials'
+1. click Create Credentials at the top, select "OAuth Client ID"
+1. set the type to "Desktop app", give it a name, and click "create"
+1. click 'Download JSON'
+1. save it to a file named gdocs-client-oauth-secret.json
 
 ### Soniox
 
-Sign up on [their website](https://soniox.com/), enable billing, give it some money, get an API key, and put it in SONIOX_KEY.txt. Unlike Google, this is a normal company which wants you to give them money, so they don't make it complicated.
+Sign up on [their website](https://soniox.com/), enable billing, give it some money (it costs ~$0.12/hr so $10 will cover > 80 hours of transcribing), get an API key, and put it in SONIOX_KEY.txt. Unlike Google, this is a normal company which wants you to give them money, so they don't make it complicated.
 
 ## Running
 
