@@ -22,13 +22,32 @@ I don't have a good solution for also transcribing your actual microphone so you
 
 ### Google
 
-(Note: Google changes their pages distressingly often. This may no longer be the process. The goal is to create a project and an OAuth client such that you have a `.json` with `"installed": { "client_id": ..., "client_secret": ..., ... }` and your project has the `.../auth/documents` scope.)
+(Note: Google changes their pages distressingly often. This may no longer be the process. The goal is to create a project and an OAuth client such that you have a `.json` with `"installed": { "client_id": ..., "client_secret": ..., ... }` and your project has the Docs API enabled and asks for the `.../auth/documents` scope.)
 
-[Create a Google Cloud project](https://console.cloud.google.com/projectcreate) if you don't already have one you want to use.
-
-Go to the [APIs & Services](https://console.developers.google.com/apis/dashboard) page on the Cloud console. Make sure you're in the right project at the top-left. Click "Data Access" on the left sidebar, "Add or remove scopes", and search for or manually add `.../auth/documents` ("See, edit, create, and delete all your Google Docs documents"). Click "save" at the bottom of the page.
-
-On the left sidebar of the APIs & Services page, click "Clients", then "Create client", then pick type "Desktop app" and give it a name you will remember (this is not user-exposed). Click "Download JSON". Move the resulting file to the top level of this project and name it `gdocs-client-oauth-secret.json`.
+1. go here: https://console.cloud.google.com/apis/library
+1. make sure you're in the google account you want to use
+1. create a new google cloud project (or select it if already created)
+1. search for the Google Docs API, click on it, then click Enable
+1. on the left pane, click 'OAuth Consent Screen'
+1. click 'Clients'
+1. click 'Get Started'
+1. enter a name for the app and select a support email, then click 'Next'
+1. select 'External' audience, then click 'Next'
+1. enter a contact email, then click 'Next', 'Continue', then 'Create'
+1. on the left pane, click 'Data Access'
+1. click 'Add or remove scopes'
+1. change 'Rows per page' to 100
+1. find '.../auth/documents', click the checkbox for it, and click 'Update' at the bottom
+1. click 'Save' at the bottom
+1. on the left pane, 'Audience'
+1. scroll down to 'Test users' and click 'Add users' (probably only necessary if not your account)
+1. add the google account you want to use for the app and click 'Save'
+1. click the hamburger menu icon in the top left and click 'APIs & Services'
+1. click 'Credentials'
+1. click Create Credentials at the top, select "OAuth Client ID"
+1. set the type to "Desktop app", give it a name, and click "create"
+1. click 'Download JSON'
+1. save it to a file named gdocs-client-oauth-secret.json
 
 ### Soniox
 
