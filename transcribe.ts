@@ -10,7 +10,7 @@ const KEY = fs.readFileSync(path.join(import.meta.dirname, './SONIOX_KEY.txt'), 
 const client = new SonioxNodeClient({ api_key: KEY });
 
 const config: SttSessionConfig = {
-  model: 'stt-rt-v4',
+  model: 'stt-rt-v5',
   language_hints: ['en'],
 
   enable_language_identification: false,
