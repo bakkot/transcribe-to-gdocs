@@ -4,7 +4,9 @@
 const REPLACEMENTS = [
   [/(?:\b(?:uh|um)\b[,\s]*)+(.)?/gi, (match, nextChar) => match[0] === 'U' && nextChar ? nextChar.toUpperCase() : (nextChar || '')],
   [/\bsho(?:e|ot?)\b/gi, 'Shu'],
+  [/\bWadwick\b/gi, 'WHATWG'],
   [/\bIntel\b/gi, 'Intl'],
+  [/\bbig int\b/gi, 'BigInt'],
   [/\btemporal\b/gi, 'Temporal'],
   [/\bsymbol(s)?\b/gi, 'Symbol$1'],
   [/\bpromise(s)?\b/gi, 'Promise$1'],
@@ -51,7 +53,8 @@ const REPLACEMENTS = [
   [/\bvenable\b/gi, 'thenable'],
   [/\bmodible\b/gi, 'Moddable'],
   [/\bmodibles\b/gi, 'Moddable\'s'],
-  [/, you know,/gi, ','],
+  [/, you know(,|\b)/gi, ','],
+  [/, like(,|\b)/gi, ','],
   [/\b(and|but|the|in|a|if|of|their|my|this|is|are|how|or|I|I'll|I'm|we|we're|on|what|it|it's|and|to|just), \1(?:, \1)*\b/gi, '$1'],
 ];
 
