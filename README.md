@@ -8,17 +8,76 @@ If you don't need the ability to edit transcripts in realtime, you may prefer to
 
 ## Setup
 
+Do either the "local" or "Docker/podman" section, then the remaining sections.
+
 ### Local
 
 Have node installed. Have `sox` or `sox_ng` installed, and have the provided `rec` binary on your path.
 
 `npm install` to install project dependencies. This intentionally pins a rather outdated version of the `googleapis` package because I couldn't figure out how to do authentication with the newer one, sorry.
 
-If you want to record meetings or other audio playing from your computer, you will also need to figure out how to route your audio out to your audio in, because this only transcribes your audio in (with [`node-record-lpcm16`](https://www.npmjs.com/package/node-record-lpcm16) wrapping `rec`). On MacOS I use the excellent [BlackHole Audio](https://github.com/ExistentialAudio/BlackHole) tool.
+If you want to record meetings or other audio playing from your computer, you will also need to figure out how to route your audio out to your audio in, because this only transcribes your audio in (with [`node-record-lpcm16`](https://www.npmjs.com/package/node-record-lpcm16) wrapping `rec`). On MacOS I use the excellent [BlackHole Audio](https://github.com/ExistentialAudio/BlackHole) tool. Claude claims that on Linux every PulseAudio/PipeWire output device ("sink") has a corresponding `.monitor` input device ("source") which carries whatever is being played, so all you need is for the default input to be the monitor of the default output.
 
 If you want to also listen to the meeting on the same computer, you'll need [a multi-output device](https://github.com/ExistentialAudio/BlackHole/wiki/Multi-Output-Device), which on MacOS you can do with built-in tools.
 
 I don't have a good solution for also transcribing your actual microphone so you can participate and be transcribed as well. Technically this is easy to do with [an aggregate input device](https://github.com/ExistentialAudio/BlackHole/wiki/Aggregate-Device), but this will add your audio stream to the transcript even when you aren't actively participating (i.e., it's not conditioned on you being unmuted in the meeting, because it has no awareness of the meeting). If you have a hardware switch for your mic this could be OK. I just use a second computer.
+
+### Docker/podman
+
+(This section can also be done on a rented VPS; see [below](#with-a-cloud-provider).)
+
+The [linuxserver webtop](https://docs.linuxserver.io/images/docker-webtop/) Docker image runs an XFCE desktop that you access from your own browser, including audio, and already has Chromium and audio routing set up the way we need it. I'm going to assume you're familiar with Docker; if you need more hand-holding, see [podman.md](podman.md).
+
+Start the container, mounting the host's `$PWD/webtop-files` at `/config` inside the container:
+```sh
+docker run -d --name webtop --shm-size=1gb \
+  -p 127.0.0.1:3001:3001 \
+  -v "$PWD/webtop-files":/config \
+  lscr.io/linuxserver/webtop:debian-xfce
+```
+or with podman:
+```sh
+mkdir -p webtop-files
+podman run -d --name webtop --shm-size=1gb \
+  -e PUID=0 -e PGID=0 \
+  -p 127.0.0.1:3001:3001 \
+  -v "$PWD/webtop-files":/config \
+  lscr.io/linuxserver/webtop:debian-xfce
+```
+
+and then open `https://127.0.0.1:3001`. You'll need to click through a self-signed certificate warning; it has to be HTTPS for the audio to work.
+
+#### Inside webtop
+
+In the docker container (either within a terminal emulator in the viewer or `docker exec -it -u abc -w /config webtop bash`'d in), install the dependencies and the project:
+
+```sh
+cd /config
+sudo apt-get update && sudo apt-get install -y nodejs sox libsox-fmt-pulse git tmux
+git clone https://github.com/bakkot/transcribe-to-gdocs.git live-transcribe-soniox
+cd live-transcribe-soniox
+git checkout soniox
+npm ci
+```
+Then on the host machine, copy your secrets into the shared `webtop-files` folder:
+
+```sh
+cp SONIOX_KEY.txt gdocs-client-oauth-secret.json GENERATED_TOKEN.json webtop-files/live-transcribe-soniox/
+```
+
+`GENERATED_TOKEN.json` is optional; if it's missing or expired, the Google sign-in flow will open in Chromium on the remote desktop, which works fine but requires you to sign in within the container.
+
+To check that audio routing works, play something (e.g. a YouTube video) in Chromium on the remote desktop and run `rec -S -n` in its terminal. This shows a level meter which should move while the video plays and go empty when you pause it.
+
+#### With a cloud provider
+
+You can use a cloud provider such as DigitalOcean and run the docker image therein by installing docker or podman and following the instructions above. I tested on DigitalOcean using a droplet with the 4 shared vCPUs + 8 GB RAM config, at $0.071/hour at time of writing.
+
+Don't change the docker command to expose the webtop publicly. Instead use SSH to forward the port:
+
+```sh
+ssh -L 3001:localhost:3001 root@the-remote-machine -N
+```
 
 ### Google
 
@@ -63,4 +122,10 @@ The tab name is optional; if omitted it will write to the first tab.
 
 The first time you run it, or if you haven't used it in a while, it should pop up a browser window to ask you to grant access. It will have a big "Google hasn’t verified this app" warning you can click through by clicking "advanced" then "go to (your app)". The subsequent permissions screen should ask for permissions to "See, edit, create, and delete all your Google Docs documents" and no other permissions if you followed the instructions above. Grant it and you should be up and running.
 
-Text will be printed to the console as it runs, and should be appearing in the specified tab of the specified document. If the transcription makes a particular error repeatedly, you can add replacement rules in `relacements.js`. This file is automatically reloaded every few seconds.
+Text will be printed to the console as it runs, and should be appearing in the specified tab of the specified document. If the transcription makes a particular error repeatedly, you can add replacement rules in `replacements.js`. This file is automatically reloaded every few seconds.
+
+You can turn off video in the meeting (and probably should, especially if you're using docker).
+
+## Backup transcripts
+
+In case the Google Doc is on the fritz or the transcript otherwise gets lost, a local copy is saved to `backup YYYY-MM-DD HH-MM-SS.txt`.
