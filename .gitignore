@@ -3,3 +3,4 @@ node_modules/
 GENERATED_TOKEN.json
 gdocs-client-oauth-secret.json
 backup*.txt
+webtop-files/
